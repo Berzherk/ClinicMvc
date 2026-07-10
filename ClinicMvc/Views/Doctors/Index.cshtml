@@ -3,35 +3,200 @@
     ViewData["Title"] = "Доктори";
 }
 
-<h1>Доктори</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Доктори</h2>
+    <button class="btn btn-primary" onclick="openCreateModal()">+ Нов доктор</button>
+</div>
 
-<p><a asp-action="Create" class="btn">+ Нов доктор</a></p>
-
-<table>
-    <thead>
+<table class="table table-bordered table-hover" id="doctorsTable">
+    <thead class="table-dark">
         <tr>
-            <th>Име</th>
+            <th>Ime</th>
             <th>Презиме</th>
             <th>Специјалност</th>
             <th>Телефон</th>
             <th>Активен</th>
-            <th></th>
+            <th>Акции</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var doctor in Model)
+        @foreach (var d in Model)
         {
-            <tr>
-                <td>@doctor.FirstName</td>
-                <td>@doctor.LastName</td>
-                <td>@doctor.Specialty</td>
-                <td>@doctor.Phone</td>
-                <td>@(doctor.IsActive ? "Да" : "Не")</td>
+            <tr id="doctor-row-@d.Id">
+                <td>@d.FirstName</td>
+                <td>@d.LastName</td>
+                <td>@d.Specialty</td>
+                <td>@d.Phone</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@doctor.Id">Измени</a> |
-                    <a asp-action="Delete" asp-route-id="@doctor.Id">Избриши</a>
+                    @if (d.IsActive)
+                    {
+                        <span class="badge bg-success">Да</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Не</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="openEditModal(@d.Id)">Измени</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteDoctor(@d.Id, '@d.FirstName @d.LastName')">Избриши</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@* ── Модал: Нов / Измени доктор ── *@
+<div class="modal fade" id="doctorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="doctorModalTitle">Нов доктор</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="doctorForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="doctorId" name="Id" value="0" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Ime <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="firstName" name="FirstName" required />
+                        <div class="invalid-feedback">Името е задолжително.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Презиме <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lastName" name="LastName" required />
+                        <div class="invalid-feedback">Презимето е задолжително.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Специјалност</label>
+                        <input type="text" class="form-control" id="specialty" name="Specialty" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Телефон</label>
+                        <input type="text" class="form-control" id="phone" name="Phone" />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="isActive" name="IsActive" value="true" checked />
+                        <label class="form-check-label" for="isActive">Активен</label>
+                    </div>
+
+                    <div id="doctorFormErrors" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
+                <button type="button" class="btn btn-primary" onclick="saveDoctor()">Зачувај</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ── Модал: Потврда за бришење ── *@
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Избриши</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Дали сте сигурни дека сакате да го избришете <strong id="deleteTargetName"></strong>?</p>
+                <form id="deleteForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteDoctorId" name="id" value="0" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Избриши</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const doctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+function openCreateModal() {
+    document.getElementById('doctorModalTitle').textContent = 'Нов доктор';
+    document.getElementById('doctorId').value = '0';
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('specialty').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('isActive').checked = true;
+    document.getElementById('doctorFormErrors').classList.add('d-none');
+    doctorModal.show();
+}
+
+function openEditModal(id) {
+    $.get(`/Doctors/GetById/${id}`, function(doc) {
+        document.getElementById('doctorModalTitle').textContent = 'Измени доктор';
+        document.getElementById('doctorId').value = doc.id;
+        document.getElementById('firstName').value = doc.firstName;
+        document.getElementById('lastName').value = doc.lastName;
+        document.getElementById('specialty').value = doc.specialty || '';
+        document.getElementById('phone').value = doc.phone || '';
+        document.getElementById('isActive').checked = doc.isActive;
+        document.getElementById('doctorFormErrors').classList.add('d-none');
+        doctorModal.show();
+    });
+}
+
+function saveDoctor() {
+    const id = document.getElementById('doctorId').value;
+    const url = id === '0' ? '/Doctors/Create' : '/Doctors/Edit';
+    const token = document.querySelector('#doctorForm input[name="__RequestVerificationToken"]').value;
+
+    const data = {
+        Id: id,
+        FirstName: document.getElementById('firstName').value,
+        LastName: document.getElementById('lastName').value,
+        Specialty: document.getElementById('specialty').value,
+        Phone: document.getElementById('phone').value,
+        IsActive: document.getElementById('isActive').checked,
+        __RequestVerificationToken: token
+    };
+
+    $.post(url, data)
+        .done(function() {
+            doctorModal.hide();
+            location.reload();
+        })
+        .fail(function(xhr) {
+            const errDiv = document.getElementById('doctorFormErrors');
+            const response = xhr.responseJSON;
+            errDiv.innerHTML = response?.errors?.join('<br>') || 'Грешка при зачувување.';
+            errDiv.classList.remove('d-none');
+        });
+}
+
+function deleteDoctor(id, name) {
+    document.getElementById('deleteDoctorId').value = id;
+    document.getElementById('deleteTargetName').textContent = name;
+    deleteModal.show();
+}
+
+function confirmDelete() {
+    const id = document.getElementById('deleteDoctorId').value;
+    const token = document.querySelector('#deleteForm input[name="__RequestVerificationToken"]').value;
+
+    $.post('/Doctors/Delete', { id: id, __RequestVerificationToken: token })
+        .done(function() {
+            deleteModal.hide();
+            $(`#doctor-row-${id}`).fadeOut(300, function() { $(this).remove(); });
+        })
+        .fail(function() {
+            alert('Грешка при бришење. Можно е докторот да има поврзани термини.');
+        });
+}
+</script>
+}

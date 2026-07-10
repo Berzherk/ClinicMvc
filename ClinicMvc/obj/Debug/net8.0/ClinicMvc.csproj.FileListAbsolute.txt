@@ -34,3 +34,4 @@ C:\Users\Slave\Desktop\ClinicMvc2\ClinicMvc\obj\Debug\net8.0\refint\ClinicMvc.dl
 C:\Users\Slave\Desktop\ClinicMvc2\ClinicMvc\obj\Debug\net8.0\ClinicMvc.pdb
 C:\Users\Slave\Desktop\ClinicMvc2\ClinicMvc\obj\Debug\net8.0\ClinicMvc.genruntimeconfig.cache
 C:\Users\Slave\Desktop\ClinicMvc2\ClinicMvc\obj\Debug\net8.0\ref\ClinicMvc.dll
+C:\Users\Slave\Desktop\ClinicMvc2\ClinicMvc\obj\Debug\net8.0\ClinicMvc.sourcelink.json

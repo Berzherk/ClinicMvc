@@ -1,154 +1,15 @@
 body {
-    font-family: Segoe UI, Arial, sans-serif;
-    margin: 0;
     background: #f5f6f8;
-    color: #222;
 }
 
-.navbar {
-    background: #2c3e50;
-    padding: 12px 24px;
-}
-
-.navbar a {
-    color: #fff;
-    text-decoration: none;
-    margin-right: 20px;
-}
-
-.navbar .brand {
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.container {
-    max-width: 960px;
-    margin: 24px auto;
-    padding: 0 16px;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    background: #fff;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    text-align: left;
-}
-
-th {
-    background: #ecf0f1;
-}
-
-form label {
-    display: block;
-    margin-top: 10px;
+.navbar-brand {
     font-weight: bold;
 }
 
-form input {
-    width: 100%;
-    max-width: 320px;
-    padding: 6px;
-    margin-top: 4px;
+.table th {
+    vertical-align: middle;
 }
 
-button, .btn {
-    margin-top: 16px;
-    padding: 8px 16px;
-    background: #2c3e50;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 16px;
-    background: #fff;
-    padding: 16px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-}
-
-.filter-field {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-field label {
-    font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 0.9em;
-}
-
-.filter-field select,
-.filter-field input {
-    padding: 6px;
-    min-width: 160px;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.filter-actions button,
-.filter-actions .btn {
-    margin-top: 0;
-}
-
-/* ── Статус баџови ── */
-.status-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.82em;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.status-zakazan    { background: #d6eaf8; color: #1a5276; }
-.status-vo-tek     { background: #d5f5e3; color: #1e8449; }
-.status-zavrsen    { background: #e8e8e8; color: #555;    }
-.status-otkazen    { background: #fde8e8; color: #a93226; }
-
-/* ── Акциски копчиња во табелата ── */
-td.actions {
-    white-space: nowrap;
-    border: 1px solid #ddd;
-}
-
-.btn-action {
-    display: inline-block;
-    padding: 4px 10px;
-    font-size: 0.85em;
-    border-radius: 4px;
-    text-decoration: none;
-    margin-right: 4px;
-}
-
-.btn-edit {
-    background: #2980b9;
-    color: #fff;
-}
-
-.btn-edit:hover {
-    background: #1a6698;
-}
-
-.btn-delete {
-    background: #c0392b;
-    color: #fff;
-}
-
-.btn-delete:hover {
-    background: #922b21;
+.table td {
+    vertical-align: middle;
 }

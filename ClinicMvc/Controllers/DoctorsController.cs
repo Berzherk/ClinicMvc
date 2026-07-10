@@ -20,10 +20,13 @@ public class DoctorsController : Controller
         return View(doctors);
     }
 
-    // GET: /Doctors/Create
-    public IActionResult Create()
+    // GET: /Doctors/GetById/5  (за Edit Modal)
+    [HttpGet]
+    public async Task<IActionResult> GetById(int id)
     {
-        return View();
+        var doctor = await _doctorRepository.GetByIdAsync(id);
+        if (doctor == null) return NotFound();
+        return Json(doctor);
     }
 
     // POST: /Doctors/Create
@@ -33,60 +36,39 @@ public class DoctorsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return View(doctor);
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage);
+            return BadRequest(new { success = false, errors });
         }
 
         await _doctorRepository.CreateAsync(doctor);
-        return RedirectToAction(nameof(Index));
+        return Ok(new { success = true });
     }
 
-    // GET: /Doctors/Edit/5
-    public async Task<IActionResult> Edit(int id)
-    {
-        var doctor = await _doctorRepository.GetByIdAsync(id);
-        if (doctor == null)
-        {
-            return NotFound();
-        }
-        return View(doctor);
-    }
-
-    // POST: /Doctors/Edit/5
+    // POST: /Doctors/Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Doctor doctor)
+    public async Task<IActionResult> Edit(Doctor doctor)
     {
-        if (id != doctor.Id)
-        {
-            return BadRequest();
-        }
-
         if (!ModelState.IsValid)
         {
-            return View(doctor);
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage);
+            return BadRequest(new { success = false, errors });
         }
 
         await _doctorRepository.UpdateAsync(doctor);
-        return RedirectToAction(nameof(Index));
-    }
-
-    // GET: /Doctors/Delete/5
-    public async Task<IActionResult> Delete(int id)
-    {
-        var doctor = await _doctorRepository.GetByIdAsync(id);
-        if (doctor == null)
-        {
-            return NotFound();
-        }
-        return View(doctor);
+        return Ok(new { success = true });
     }
 
     // POST: /Doctors/Delete/5
-    [HttpPost, ActionName("Delete")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         await _doctorRepository.DeleteAsync(id);
-        return RedirectToAction(nameof(Index));
+        return Ok(new { success = true });
     }
 }
