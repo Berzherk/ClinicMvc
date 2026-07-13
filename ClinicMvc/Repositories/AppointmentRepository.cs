@@ -5,16 +5,20 @@ using Dapper;
 
 namespace ClinicMvc.Repositories;
 
+/// <summary>
+/// Репозиториум за управување со термини во базата на податоци.
+/// Содржи сите SQL операции поврзани со табелата APPOINTMENTS.
+/// </summary>
 public class AppointmentRepository : IAppointmentRepository
 {
+    // Фабрика за креирање на конекција со Firebird базата
     private readonly IDbConnectionFactory _connectionFactory;
 
-    public AppointmentRepository(IDbConnectionFactory connectionFactory)
-    {
-        _connectionFactory = connectionFactory;
-    }
-
-    // Основен SELECT со JOIN-ови за приказ
+    /// <summary>
+    /// Основен SELECT со JOIN-ови за прикажување на термините со имиња на лекар и пациент.
+    /// Забелешка: колоната PARIENTID е типографска грешка во базата (наместо PATIENTID),
+    /// затоа ја алиасираме до PATIENTID за да одговара на C# моделот.
+    /// </summary>
     private const string SelectSql = @"
         SELECT
             a.ID,
@@ -31,47 +35,71 @@ public class AppointmentRepository : IAppointmentRepository
         JOIN DOCTORS  d ON d.ID = a.DOCTORID
         JOIN PATIENTS p ON p.ID = a.PARIENTID";
 
+    public AppointmentRepository(IDbConnectionFactory connectionFactory)
+    {
+        _connectionFactory = connectionFactory;
+    }
+
+    /// <summary>
+    /// Ги враќа сите термини без филтри.
+    /// </summary>
     public async Task<IEnumerable<Appointment>> GetAllAsync()
     {
         return await SearchAsync(new AppointmentFilter());
     }
 
+    /// <summary>
+    /// Пребарува термини според зadadените филтри.
+    /// Динамички гради WHERE клаузула само за полињата кои се пополнети.
+    /// </summary>
     public async Task<IEnumerable<Appointment>> SearchAsync(AppointmentFilter filter)
     {
         using var connection = _connectionFactory.CreateConnection();
+
+        // Почни со базичниот SQL и додавај услови според филтрите
         var sql = new StringBuilder(SelectSql + " WHERE 1=1");
         var p   = new DynamicParameters();
 
+        // Филтер по лекар
         if (filter.DoctorId.HasValue)
         {
             sql.Append(" AND a.DOCTORID = @DoctorId");
             p.Add("DoctorId", filter.DoctorId.Value);
         }
+        // Филтер по специјалност
         if (!string.IsNullOrWhiteSpace(filter.Specialty))
         {
             sql.Append(" AND d.SPECIALTY = @Specialty");
             p.Add("Specialty", filter.Specialty);
         }
+        // Филтер по статус
         if (!string.IsNullOrWhiteSpace(filter.Status))
         {
             sql.Append(" AND a.STATUS = @Status");
             p.Add("Status", filter.Status);
         }
+        // Филтер по почетен датум
         if (filter.DateFrom.HasValue)
         {
             sql.Append(" AND a.APPOINTMENTDATE >= @DateFrom");
             p.Add("DateFrom", filter.DateFrom.Value.Date);
         }
+        // Филтер по краен датум
         if (filter.DateTo.HasValue)
         {
             sql.Append(" AND a.APPOINTMENTDATE <= @DateTo");
             p.Add("DateTo", filter.DateTo.Value.Date);
         }
 
+        // Подреди по датум и време
         sql.Append(" ORDER BY a.APPOINTMENTDATE, a.APPOINTMENTTIME");
         return await connection.QueryAsync<Appointment>(sql.ToString(), p);
     }
 
+    /// <summary>
+    /// Го враќа еден термин според ID.
+    /// Се користи за полнење на Edit модалот.
+    /// </summary>
     public async Task<Appointment?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -81,6 +109,10 @@ public class AppointmentRepository : IAppointmentRepository
         return await connection.QueryFirstOrDefaultAsync<Appointment>(sql, new { Id = id });
     }
 
+    /// <summary>
+    /// Креира нов термин во базата.
+    /// Го враќа ID-то на новиот запис (RETURNING ID).
+    /// </summary>
     public async Task<int> CreateAsync(Appointment appointment)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -92,6 +124,9 @@ public class AppointmentRepository : IAppointmentRepository
         return await connection.ExecuteScalarAsync<int>(sql, appointment);
     }
 
+    /// <summary>
+    /// Ажурира постоечки термин во базата.
+    /// </summary>
     public async Task UpdateAsync(Appointment appointment)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -106,6 +141,9 @@ public class AppointmentRepository : IAppointmentRepository
         await connection.ExecuteAsync(sql, appointment);
     }
 
+    /// <summary>
+    /// Брише термин од базата според ID.
+    /// </summary>
     public async Task DeleteAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -113,7 +151,11 @@ public class AppointmentRepository : IAppointmentRepository
         await connection.ExecuteAsync(sql, new { Id = id });
     }
 
-    // Провери дали докторот веќе има термин во истото датум+време
+    /// <summary>
+    /// Проверува дали докторот веќе има термин во истото датум и време.
+    /// Се користи за спречување на дупли термини.
+    /// excludeId - ID на терминот кој се игнорира (при измена на постоечки термин)
+    /// </summary>
     public async Task<bool> HasConflictAsync(int doctorId, DateTime date, TimeSpan time, int excludeId = 0)
     {
         using var connection = _connectionFactory.CreateConnection();
