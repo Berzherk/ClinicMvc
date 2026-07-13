@@ -234,7 +234,7 @@
         document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0]; // Денешен датум
         document.getElementById('appointmentTime').value = '';
         document.getElementById('notes').value           = '';
-        document.getElementById('appointmentFormErrors').classList.add('d-none');
+        clearAppointmentValidation();
         fillDropdowns(0, 0, dropdowns.statuses?.[0]);
         appointmentModal.show();
     }
@@ -248,14 +248,74 @@
             document.getElementById('appointmentDate').value = a.appointmentDate?.split('T')[0];
             document.getElementById('appointmentTime').value = a.appointmentTime?.substring(0, 5);
             document.getElementById('notes').value           = a.notes || '';
-            document.getElementById('appointmentFormErrors').classList.add('d-none');
+            clearAppointmentValidation();
             fillDropdowns(a.doctorId, a.patientId, a.status);
             appointmentModal.show();
         });
     }
 
+    // Клиентска валидација на формата за термин
+    // Враќа true ако сите задолжителни полиња се пополнети
+    function validateAppointmentForm() {
+        let isValid = true;
+
+        // Провери дали е избран лекар
+        const doctorId = document.getElementById('doctorId');
+        if (!doctorId.value) {
+            doctorId.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            doctorId.classList.remove('is-invalid');
+            doctorId.classList.add('is-valid');
+        }
+
+        // Провери дали е избран пациент
+        const patientId = document.getElementById('patientId');
+        if (!patientId.value) {
+            patientId.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            patientId.classList.remove('is-invalid');
+            patientId.classList.add('is-valid');
+        }
+
+        // Провери дали е внесен датум
+        const appointmentDate = document.getElementById('appointmentDate');
+        if (!appointmentDate.value) {
+            appointmentDate.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            appointmentDate.classList.remove('is-invalid');
+            appointmentDate.classList.add('is-valid');
+        }
+
+        // Провери дали е внесено време
+        const appointmentTime = document.getElementById('appointmentTime');
+        if (!appointmentTime.value) {
+            appointmentTime.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            appointmentTime.classList.remove('is-invalid');
+            appointmentTime.classList.add('is-valid');
+        }
+
+        return isValid;
+    }
+
+    // Отстрани ги сите валидациски стилови при отворање на модалот
+    function clearAppointmentValidation() {
+        document.getElementById('appointmentFormErrors').classList.add('d-none');
+        ['doctorId', 'patientId', 'appointmentDate', 'appointmentTime'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('is-invalid', 'is-valid');
+        });
+    }
+
     // Зачувај термин - Create или Edit зависно од ID
     function saveAppointment() {
+        // Прво изврши клиентска валидација
+        if (!validateAppointmentForm()) return;
+
         const id    = document.getElementById('appointmentId').value;
         const url   = id === '0' ? '/Appointments/Create' : '/Appointments/Edit';
         const token = document.querySelector('#appointmentForm input[name="__RequestVerificationToken"]').value;

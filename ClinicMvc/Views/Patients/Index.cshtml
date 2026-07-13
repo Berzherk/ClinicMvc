@@ -1,13 +1,16 @@
+@* Модел - листа на сите пациенти *@
 @model IEnumerable<Patient>
 @{
     ViewData["Title"] = "Пациенти";
 }
 
+@* Наслов и копче за додавање нов пациент *@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Пациенти</h2>
     <button class="btn btn-primary" onclick="openCreateModal()">+ Нов пациент</button>
 </div>
 
+@* Табела со листа на пациенти *@
 <table class="table table-bordered table-hover" id="patientsTable">
     <thead class="table-dark">
         <tr>
@@ -37,7 +40,7 @@
     </tbody>
 </table>
 
-@* ── Модал: Нов / Измени пациент ── *@
+@* Модал за креирање и измена на пациент *@
 <div class="modal fade" id="patientModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -46,41 +49,50 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="patientForm">
+                <form id="patientForm" novalidate>
+                    @* Безбедносен токен за заштита од CSRF напади *@
                     @Html.AntiForgeryToken()
+                    @* Скриено поле за ID - 0 значи нов пациент *@
                     <input type="hidden" id="patientId" name="Id" value="0" />
 
+                    @* Ime - задолжително поле *@
                     <div class="mb-3">
                         <label class="form-label">Ime <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="firstName" name="FirstName" required />
+                        <input type="text" class="form-control" id="firstName" name="FirstName" />
                         <div class="invalid-feedback">Името е задолжително.</div>
                     </div>
 
+                    @* Презиме - задолжително поле *@
                     <div class="mb-3">
                         <label class="form-label">Презиме <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="lastName" name="LastName" required />
+                        <input type="text" class="form-control" id="lastName" name="LastName" />
                         <div class="invalid-feedback">Презимето е задолжително.</div>
                     </div>
 
+                    @* ЕМБГ - задолжително, точно 13 цифри, мора да биде уникатен *@
                     <div class="mb-3">
                         <label class="form-label">ЕМБГ <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="embg" name="Embg"
-                               maxlength="13" placeholder="13 цифри" required />
-                        <div class="invalid-feedback">ЕМБГ е задолжителен (13 цифри).</div>
+                               maxlength="13" placeholder="1234567890123" />
+                        <div class="invalid-feedback" id="embgError">ЕМБГ мора да содржи точно 13 цифри.</div>
                     </div>
 
+                    @* Телефон - незадолжително *@
                     <div class="mb-3">
                         <label class="form-label">Телефон</label>
                         <input type="text" class="form-control" id="phone" name="Phone" />
+                        <div class="invalid-feedback">Телефонот смее да содржи само цифри и + знак.</div>
                     </div>
 
+                    @* Е-пошта - незадолжително, но мора да биде во валиден формат *@
                     <div class="mb-3">
                         <label class="form-label">Е-пошта</label>
-                        <input type="email" class="form-control" id="email" name="Email"
+                        <input type="text" class="form-control" id="email" name="Email"
                                placeholder="primer@mail.com" />
-                        <div class="invalid-feedback">Внесете валидна е-пошта.</div>
+                        <div class="invalid-feedback">Внесете валидна е-пошта адреса (пример: ime@mail.com).</div>
                     </div>
 
+                    @* Порака за грешки од серверот - скриена по default *@
                     <div id="patientFormErrors" class="alert alert-danger d-none"></div>
                 </form>
             </div>
@@ -92,7 +104,7 @@
     </div>
 </div>
 
-@* ── Модал: Потврда за бришење ── *@
+@* Модал за потврда на бришење *@
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -117,90 +129,167 @@
 
 @section Scripts {
 <script>
-const patientModal = new bootstrap.Modal(document.getElementById('patientModal'));
-const deleteModal  = new bootstrap.Modal(document.getElementById('deleteModal'));
+    // Иницијализација на Bootstrap модали
+    const patientModal = new bootstrap.Modal(document.getElementById('patientModal'));
+    const deleteModal  = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-function openCreateModal() {
-    document.getElementById('patientModalTitle').textContent = 'Нов пациент';
-    document.getElementById('patientId').value = '0';
-    document.getElementById('firstName').value = '';
-    document.getElementById('lastName').value  = '';
-    document.getElementById('embg').value      = '';
-    document.getElementById('phone').value     = '';
-    document.getElementById('email').value     = '';
-    document.getElementById('patientFormErrors').classList.add('d-none');
-    patientModal.show();
-}
-
-function openEditModal(id) {
-    $.get(`/Patients/GetById/${id}`, function(p) {
-        document.getElementById('patientModalTitle').textContent = 'Измени пациент';
-        document.getElementById('patientId').value = p.id;
-        document.getElementById('firstName').value = p.firstName;
-        document.getElementById('lastName').value  = p.lastName;
-        document.getElementById('embg').value      = p.embg;
-        document.getElementById('phone').value     = p.phone  || '';
-        document.getElementById('email').value     = p.email  || '';
-        document.getElementById('patientFormErrors').classList.add('d-none');
+    // Отвори модал за нов пациент - ресетирај ги сите полиња
+    function openCreateModal() {
+        document.getElementById('patientModalTitle').textContent = 'Нов пациент';
+        document.getElementById('patientId').value = '0';
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value  = '';
+        document.getElementById('embg').value      = '';
+        document.getElementById('phone').value     = '';
+        document.getElementById('email').value     = '';
+        clearValidation();
         patientModal.show();
-    });
-}
-
-function savePatient() {
-    const id  = document.getElementById('patientId').value;
-    const url = id === '0' ? '/Patients/Create' : '/Patients/Edit';
-    const token = document.querySelector('#patientForm input[name="__RequestVerificationToken"]').value;
-
-    // Client-side: EMBG must be exactly 13 digits
-    const embg = document.getElementById('embg').value.trim();
-    if (!/^\d{13}$/.test(embg)) {
-        const errDiv = document.getElementById('patientFormErrors');
-        errDiv.textContent = 'ЕМБГ мора да содржи точно 13 цифри.';
-        errDiv.classList.remove('d-none');
-        return;
     }
 
-    const data = {
-        Id:        id,
-        FirstName: document.getElementById('firstName').value,
-        LastName:  document.getElementById('lastName').value,
-        Embg:      embg,
-        Phone:     document.getElementById('phone').value,
-        Email:     document.getElementById('email').value,
-        __RequestVerificationToken: token
-    };
-
-    $.post(url, data)
-        .done(function() {
-            patientModal.hide();
-            location.reload();
-        })
-        .fail(function(xhr) {
-            const errDiv = document.getElementById('patientFormErrors');
-            const response = xhr.responseJSON;
-            errDiv.innerHTML = response?.errors?.join('<br>') || 'Грешка при зачувување.';
-            errDiv.classList.remove('d-none');
+    // Отвори модал за измена - вчитај ги податоците преку AJAX
+    function openEditModal(id) {
+        $.get(`/Patients/GetById/${id}`, function(p) {
+            document.getElementById('patientModalTitle').textContent = 'Измени пациент';
+            document.getElementById('patientId').value = p.id;
+            document.getElementById('firstName').value = p.firstName;
+            document.getElementById('lastName').value  = p.lastName;
+            document.getElementById('embg').value      = p.embg;
+            document.getElementById('phone').value     = p.phone  || '';
+            document.getElementById('email').value     = p.email  || '';
+            clearValidation();
+            patientModal.show();
         });
-}
+    }
 
-function deletePatient(id, name) {
-    document.getElementById('deletePatientId').value  = id;
-    document.getElementById('deleteTargetName').textContent = name;
-    deleteModal.show();
-}
+    // Клиентска валидација пред испраќање до серверот
+    // Враќа true ако сите полиња се валидни
+    function validatePatientForm() {
+        let isValid = true;
 
-function confirmDelete() {
-    const id    = document.getElementById('deletePatientId').value;
-    const token = document.querySelector('#deleteForm input[name="__RequestVerificationToken"]').value;
+        // Провери дали Ime е пополнето
+        const firstName = document.getElementById('firstName');
+        if (!firstName.value.trim()) {
+            firstName.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            firstName.classList.remove('is-invalid');
+            firstName.classList.add('is-valid');
+        }
 
-    $.post('/Patients/Delete', { id: id, __RequestVerificationToken: token })
-        .done(function() {
-            deleteModal.hide();
-            $(`#patient-row-${id}`).fadeOut(300, function() { $(this).remove(); });
-        })
-        .fail(function() {
-            alert('Грешка при бришење. Можно е пациентот да има поврзани термини.');
+        // Провери дали Презиме е пополнето
+        const lastName = document.getElementById('lastName');
+        if (!lastName.value.trim()) {
+            lastName.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            lastName.classList.remove('is-invalid');
+            lastName.classList.add('is-valid');
+        }
+
+        // Провери дали ЕМБГ е точно 13 цифри
+        const embg = document.getElementById('embg');
+        const embgError = document.getElementById('embgError');
+        if (!embg.value.trim()) {
+            embgError.textContent = 'ЕМБГ е задолжителен.';
+            embg.classList.add('is-invalid');
+            isValid = false;
+        } else if (!/^\d{13}$/.test(embg.value.trim())) {
+            embgError.textContent = 'ЕМБГ мора да содржи точно 13 цифри.';
+            embg.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            embg.classList.remove('is-invalid');
+            embg.classList.add('is-valid');
+        }
+
+        // Провери формат на телефон (дозволени: цифри, +, празни места, цртички)
+        const phone = document.getElementById('phone');
+        if (phone.value.trim() && !/^[0-9+\s\-]+$/.test(phone.value.trim())) {
+            phone.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            phone.classList.remove('is-invalid');
+            if (phone.value.trim()) phone.classList.add('is-valid');
+        }
+
+        // Провери формат на е-пошта (мора да содржи и точка)
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if (email.value.trim() && !emailRegex.test(email.value.trim())) {
+            email.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            email.classList.remove('is-invalid');
+            if (email.value.trim()) email.classList.add('is-valid');
+        }
+
+        return isValid;
+    }
+
+    // Отстрани ги сите валидациски стилови при отворање на модалот
+    function clearValidation() {
+        document.getElementById('patientFormErrors').classList.add('d-none');
+        ['firstName', 'lastName', 'embg', 'phone', 'email'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('is-invalid', 'is-valid');
         });
-}
+    }
+
+    // Зачувај пациент - Create или Edit зависно од ID
+    function savePatient() {
+        // Прво изврши клиентска валидација
+        if (!validatePatientForm()) return;
+
+        const id    = document.getElementById('patientId').value;
+        const url   = id === '0' ? '/Patients/Create' : '/Patients/Edit';
+        const token = document.querySelector('#patientForm input[name="__RequestVerificationToken"]').value;
+
+        const data = {
+            Id:        id,
+            FirstName: document.getElementById('firstName').value.trim(),
+            LastName:  document.getElementById('lastName').value.trim(),
+            Embg:      document.getElementById('embg').value.trim(),
+            Phone:     document.getElementById('phone').value.trim(),
+            Email:     document.getElementById('email').value.trim(),
+            __RequestVerificationToken: token
+        };
+
+        // Испрати AJAX POST барање до серверот
+        $.post(url, data)
+            .done(function() {
+                patientModal.hide();
+                location.reload();
+            })
+            .fail(function(xhr) {
+                // Прикажи ги серверските грешки (пр. ЕМБГ веќе постои)
+                const errDiv   = document.getElementById('patientFormErrors');
+                const response = xhr.responseJSON;
+                errDiv.innerHTML = response?.errors?.join('<br>') || 'Грешка при зачувување.';
+                errDiv.classList.remove('d-none');
+            });
+    }
+
+    // Отвори модал за потврда на бришење
+    function deletePatient(id, name) {
+        document.getElementById('deletePatientId').value         = id;
+        document.getElementById('deleteTargetName').textContent  = name;
+        deleteModal.show();
+    }
+
+    // Потврди бришење - испрати AJAX POST барање
+    function confirmDelete() {
+        const id    = document.getElementById('deletePatientId').value;
+        const token = document.querySelector('#deleteForm input[name="__RequestVerificationToken"]').value;
+
+        $.post('/Patients/Delete', { id: id, __RequestVerificationToken: token })
+            .done(function() {
+                deleteModal.hide();
+                // Отстрани го редот од табелата со анимација
+                $(`#patient-row-${id}`).fadeOut(300, function() { $(this).remove(); });
+            })
+            .fail(function() {
+                alert('Грешка при бришење. Можно е пациентот да има поврзани термини.');
+            });
+    }
 </script>
 }

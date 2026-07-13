@@ -1,13 +1,16 @@
+@* Модел - листа на сите доктори *@
 @model IEnumerable<Doctor>
 @{
     ViewData["Title"] = "Доктори";
 }
 
+@* Наслов и копче за додавање нов доктор *@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Доктори</h2>
     <button class="btn btn-primary" onclick="openCreateModal()">+ Нов доктор</button>
 </div>
 
+@* Табела со листа на доктори *@
 <table class="table table-bordered table-hover" id="doctorsTable">
     <thead class="table-dark">
         <tr>
@@ -46,7 +49,7 @@
     </tbody>
 </table>
 
-@* ── Модал: Нов / Измени доктор ── *@
+@* Модал за креирање и измена на доктор *@
 <div class="modal fade" id="doctorModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -55,37 +58,46 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="doctorForm">
+                <form id="doctorForm" novalidate>
+                    @* Безбедносен токен за заштита од CSRF напади *@
                     @Html.AntiForgeryToken()
+                    @* Скриено поле за ID - 0 значи нов доктор *@
                     <input type="hidden" id="doctorId" name="Id" value="0" />
 
+                    @* Ime - задолжително поле *@
                     <div class="mb-3">
                         <label class="form-label">Ime <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="firstName" name="FirstName" required />
+                        <input type="text" class="form-control" id="firstName" name="FirstName" />
                         <div class="invalid-feedback">Името е задолжително.</div>
                     </div>
 
+                    @* Презиме - задолжително поле *@
                     <div class="mb-3">
                         <label class="form-label">Презиме <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="lastName" name="LastName" required />
+                        <input type="text" class="form-control" id="lastName" name="LastName" />
                         <div class="invalid-feedback">Презимето е задолжително.</div>
                     </div>
 
+                    @* Специјалност - незадолжително *@
                     <div class="mb-3">
                         <label class="form-label">Специјалност</label>
                         <input type="text" class="form-control" id="specialty" name="Specialty" />
                     </div>
 
+                    @* Телефон - незадолжително *@
                     <div class="mb-3">
                         <label class="form-label">Телефон</label>
                         <input type="text" class="form-control" id="phone" name="Phone" />
+                        <div class="invalid-feedback">Телефонот смее да содржи само цифри и + знак.</div>
                     </div>
 
+                    @* Статус на активност *@
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="isActive" name="IsActive" value="true" checked />
                         <label class="form-check-label" for="isActive">Активен</label>
                     </div>
 
+                    @* Порака за грешки - скриена по default *@
                     <div id="doctorFormErrors" class="alert alert-danger d-none"></div>
                 </form>
             </div>
@@ -97,7 +109,7 @@
     </div>
 </div>
 
-@* ── Модал: Потврда за бришење ── *@
+@* Модал за потврда на бришење *@
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -122,81 +134,140 @@
 
 @section Scripts {
 <script>
-const doctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
-const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    // Иницијализација на Bootstrap модали
+    const doctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-function openCreateModal() {
-    document.getElementById('doctorModalTitle').textContent = 'Нов доктор';
-    document.getElementById('doctorId').value = '0';
-    document.getElementById('firstName').value = '';
-    document.getElementById('lastName').value = '';
-    document.getElementById('specialty').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('isActive').checked = true;
-    document.getElementById('doctorFormErrors').classList.add('d-none');
-    doctorModal.show();
-}
-
-function openEditModal(id) {
-    $.get(`/Doctors/GetById/${id}`, function(doc) {
-        document.getElementById('doctorModalTitle').textContent = 'Измени доктор';
-        document.getElementById('doctorId').value = doc.id;
-        document.getElementById('firstName').value = doc.firstName;
-        document.getElementById('lastName').value = doc.lastName;
-        document.getElementById('specialty').value = doc.specialty || '';
-        document.getElementById('phone').value = doc.phone || '';
-        document.getElementById('isActive').checked = doc.isActive;
-        document.getElementById('doctorFormErrors').classList.add('d-none');
+    // Отвори модал за нов доктор - ресетирај ги сите полиња
+    function openCreateModal() {
+        document.getElementById('doctorModalTitle').textContent = 'Нов доктор';
+        document.getElementById('doctorId').value    = '0';
+        document.getElementById('firstName').value  = '';
+        document.getElementById('lastName').value   = '';
+        document.getElementById('specialty').value  = '';
+        document.getElementById('phone').value      = '';
+        document.getElementById('isActive').checked = true;
+        clearValidation();
         doctorModal.show();
-    });
-}
+    }
 
-function saveDoctor() {
-    const id = document.getElementById('doctorId').value;
-    const url = id === '0' ? '/Doctors/Create' : '/Doctors/Edit';
-    const token = document.querySelector('#doctorForm input[name="__RequestVerificationToken"]').value;
-
-    const data = {
-        Id: id,
-        FirstName: document.getElementById('firstName').value,
-        LastName: document.getElementById('lastName').value,
-        Specialty: document.getElementById('specialty').value,
-        Phone: document.getElementById('phone').value,
-        IsActive: document.getElementById('isActive').checked,
-        __RequestVerificationToken: token
-    };
-
-    $.post(url, data)
-        .done(function() {
-            doctorModal.hide();
-            location.reload();
-        })
-        .fail(function(xhr) {
-            const errDiv = document.getElementById('doctorFormErrors');
-            const response = xhr.responseJSON;
-            errDiv.innerHTML = response?.errors?.join('<br>') || 'Грешка при зачувување.';
-            errDiv.classList.remove('d-none');
+    // Отвори модал за измена - вчитај ги податоците преку AJAX
+    function openEditModal(id) {
+        $.get(`/Doctors/GetById/${id}`, function(doc) {
+            document.getElementById('doctorModalTitle').textContent = 'Измени доктор';
+            document.getElementById('doctorId').value    = doc.id;
+            document.getElementById('firstName').value  = doc.firstName;
+            document.getElementById('lastName').value   = doc.lastName;
+            document.getElementById('specialty').value  = doc.specialty || '';
+            document.getElementById('phone').value      = doc.phone || '';
+            document.getElementById('isActive').checked = doc.isActive;
+            clearValidation();
+            doctorModal.show();
         });
-}
+    }
 
-function deleteDoctor(id, name) {
-    document.getElementById('deleteDoctorId').value = id;
-    document.getElementById('deleteTargetName').textContent = name;
-    deleteModal.show();
-}
+    // Клиентска валидација пред испраќање до серверот
+    // Враќа true ако сите полиња се валидни, false ако има грешки
+    function validateDoctorForm() {
+        let isValid = true;
 
-function confirmDelete() {
-    const id = document.getElementById('deleteDoctorId').value;
-    const token = document.querySelector('#deleteForm input[name="__RequestVerificationToken"]').value;
+        // Провери дали Ime е пополнето
+        const firstName = document.getElementById('firstName');
+        if (!firstName.value.trim()) {
+            firstName.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            firstName.classList.remove('is-invalid');
+            firstName.classList.add('is-valid');
+        }
 
-    $.post('/Doctors/Delete', { id: id, __RequestVerificationToken: token })
-        .done(function() {
-            deleteModal.hide();
-            $(`#doctor-row-${id}`).fadeOut(300, function() { $(this).remove(); });
-        })
-        .fail(function() {
-            alert('Грешка при бришење. Можно е докторот да има поврзани термини.');
+        // Провери дали Презиме е пополнето
+        const lastName = document.getElementById('lastName');
+        if (!lastName.value.trim()) {
+            lastName.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            lastName.classList.remove('is-invalid');
+            lastName.classList.add('is-valid');
+        }
+
+        // Провери формат на телефон (дозволени: цифри, +, празни места, цртички)
+        const phone = document.getElementById('phone');
+        if (phone.value.trim() && !/^[0-9+\s\-]+$/.test(phone.value.trim())) {
+            phone.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            phone.classList.remove('is-invalid');
+            if (phone.value.trim()) phone.classList.add('is-valid');
+        }
+
+        return isValid;
+    }
+
+    // Отстрани ги сите валидациски стилови при отворање на модалот
+    function clearValidation() {
+        document.getElementById('doctorFormErrors').classList.add('d-none');
+        ['firstName', 'lastName', 'specialty', 'phone'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('is-invalid', 'is-valid');
         });
-}
+    }
+
+    // Зачувај доктор - Create или Edit зависно од ID
+    function saveDoctor() {
+        // Прво изврши клиентска валидација
+        if (!validateDoctorForm()) return;
+
+        const id    = document.getElementById('doctorId').value;
+        const url   = id === '0' ? '/Doctors/Create' : '/Doctors/Edit';
+        const token = document.querySelector('#doctorForm input[name="__RequestVerificationToken"]').value;
+
+        const data = {
+            Id:        id,
+            FirstName: document.getElementById('firstName').value.trim(),
+            LastName:  document.getElementById('lastName').value.trim(),
+            Specialty: document.getElementById('specialty').value.trim(),
+            Phone:     document.getElementById('phone').value.trim(),
+            IsActive:  document.getElementById('isActive').checked,
+            __RequestVerificationToken: token
+        };
+
+        // Испрати AJAX POST барање до серверот
+        $.post(url, data)
+            .done(function() {
+                doctorModal.hide();
+                location.reload();
+            })
+            .fail(function(xhr) {
+                // Прикажи ги серверските грешки
+                const errDiv   = document.getElementById('doctorFormErrors');
+                const response = xhr.responseJSON;
+                errDiv.innerHTML = response?.errors?.join('<br>') || 'Грешка при зачувување.';
+                errDiv.classList.remove('d-none');
+            });
+    }
+
+    // Отвори модал за потврда на бришење
+    function deleteDoctor(id, name) {
+        document.getElementById('deleteDoctorId').value         = id;
+        document.getElementById('deleteTargetName').textContent = name;
+        deleteModal.show();
+    }
+
+    // Потврди бришење - испрати AJAX POST барање
+    function confirmDelete() {
+        const id    = document.getElementById('deleteDoctorId').value;
+        const token = document.querySelector('#deleteForm input[name="__RequestVerificationToken"]').value;
+
+        $.post('/Doctors/Delete', { id: id, __RequestVerificationToken: token })
+            .done(function() {
+                deleteModal.hide();
+                // Отстрани го редот од табелата со анимација
+                $(`#doctor-row-${id}`).fadeOut(300, function() { $(this).remove(); });
+            })
+            .fail(function() {
+                alert('Грешка при бришење. Можно е докторот да има поврзани термини.');
+            });
+    }
 </script>
 }
