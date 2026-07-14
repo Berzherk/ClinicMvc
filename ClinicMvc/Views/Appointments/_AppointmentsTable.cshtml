@@ -1,3 +1,4 @@
+@* Partial View за табеларен приказ на термините - го користат Index и AJAX повиците *@
 @model IEnumerable<Appointment>
 
 <table class="table table-bordered table-hover">
@@ -31,6 +32,7 @@
                     <td>@a.DoctorSpecialty</td>
                     <td>
                         @{
+                            // Секој статус добива своја боја за полесно визуелно снаоѓање
                             var badgeClass = a.Status switch
                             {
                                 "Zakazan"  => "bg-primary",
@@ -42,7 +44,21 @@
                         }
                         <span class="badge @badgeClass">@a.Status</span>
                     </td>
-                    <td>
+                    <td class="text-nowrap">
+                        @* Копче "Почни преглед" - видливо само за термини во статус Zakazan (Task 8) *@
+                        @if (a.Status == "Zakazan")
+                        {
+                            <button class="btn btn-sm btn-success"
+                                    onclick="startExam(@a.Id)" title="Започни преглед">▶ Почни</button>
+                        }
+
+                        @* Копче "Заврши преглед" - видливо само за термини во статус Vo tek (Task 9) *@
+                        @if (a.Status == "Vo tek")
+                        {
+                            <button class="btn btn-sm btn-secondary"
+                                    onclick="openFinishModal(@a.Id)" title="Заврши преглед">■ Заврши</button>
+                        }
+
                         <button class="btn btn-sm btn-warning"
                                 onclick="openEditModal(@a.Id)">Измени</button>
                         <button class="btn btn-sm btn-danger"

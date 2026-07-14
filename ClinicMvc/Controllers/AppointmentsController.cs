@@ -192,4 +192,48 @@ public class AppointmentsController : Controller
         await _appointmentRepository.DeleteAsync(id);
         return Ok(new { success = true });
     }
+
+    /// <summary>
+    /// POST: /Appointments/StartExam
+    /// Task 8 - Почеток на преглед.
+    /// Го менува статусот на терминот од "Zakazan" во "Vo tek".
+    /// Дозволено е само ако терминот моментално е во статус "Zakazan".
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> StartExam(int id)
+    {
+        var appointment = await _appointmentRepository.GetByIdAsync(id);
+        if (appointment == null)
+            return NotFound(new { success = false, errors = new[] { "Терминот не постои." } });
+
+        // Дозволи промена само од Zakazan во Vo tek
+        if (appointment.Status != "Zakazan")
+            return BadRequest(new { success = false, errors = new[] { "Прегледот може да започне само за закажани термини." } });
+
+        await _appointmentRepository.UpdateStatusAsync(id, "Vo tek");
+        return Ok(new { success = true });
+    }
+
+    /// <summary>
+    /// POST: /Appointments/FinishExam
+    /// Task 9 - Завршување на преглед.
+    /// Го менува статусот на терминот од "Vo tek" во "Zavrsen" и ги зачувува белешките.
+    /// Дозволено е само ако терминот моментално е во статус "Vo tek".
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FinishExam(int id, string? notes)
+    {
+        var appointment = await _appointmentRepository.GetByIdAsync(id);
+        if (appointment == null)
+            return NotFound(new { success = false, errors = new[] { "Терминот не постои." } });
+
+        // Дозволи промена само од Vo tek во Zavrsen
+        if (appointment.Status != "Vo tek")
+            return BadRequest(new { success = false, errors = new[] { "Прегледот може да заврши само ако е во тек." } });
+
+        await _appointmentRepository.UpdateStatusAsync(id, "Zavrsen", notes);
+        return Ok(new { success = true });
+    }
 }

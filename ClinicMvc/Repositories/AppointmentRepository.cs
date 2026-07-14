@@ -168,4 +168,38 @@ public class AppointmentRepository : IAppointmentRepository
             new { DoctorId = doctorId, Date = date.Date, Time = time, ExcludeId = excludeId });
         return count > 0;
     }
+
+    /// <summary>
+    /// Го менува статусот на термин (пр. Zakazan → Vo tek → Zavrsen).
+    /// Ако се проследат белешки, ги ажурира и нив (се користи при завршување на преглед).
+    /// Ако notes е null, полето NOTES во базата останува непроменето.
+    /// </summary>
+    public async Task UpdateStatusAsync(int id, string newStatus, string? notes = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Ако се проследени белешки - ажурирај и статус и белешки
+        // Ако не се проследени - ажурирај само статус (COALESCE го задржува старото NOTES)
+        const string sql = @"UPDATE APPOINTMENTS
+                              SET STATUS = @Status,
+                                  NOTES  = COALESCE(@Notes, NOTES)
+                              WHERE ID = @Id";
+        await connection.ExecuteAsync(sql, new { Id = id, Status = newStatus, Notes = notes });
+    }
+
+    /// <summary>
+    /// Ги враќа сите закажани времиња за конкретен доктор на конкретен датум.
+    /// Откажаните термини (Otkazen) НЕ се сметаат за зафатени - тој термин е слободен.
+    /// Се користи за пресметка на слободни термини.
+    /// </summary>
+    public async Task<IEnumerable<TimeSpan>> GetBookedTimesAsync(int doctorId, DateTime date)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = @"SELECT APPOINTMENTTIME
+                              FROM APPOINTMENTS
+                              WHERE DOCTORID        = @DoctorId
+                                AND APPOINTMENTDATE = @Date
+                                AND STATUS          <> 'Otkazen'";
+        return await connection.QueryAsync<TimeSpan>(sql, new { DoctorId = doctorId, Date = date.Date });
+    }
 }

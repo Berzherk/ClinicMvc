@@ -1,0 +1,88 @@
+@* Модел со филтри и dropdown опции за приказ на слободни термини *@
+@model FreeSlotsViewModel
+@{
+    ViewData["Title"] = "Слободни термини";
+}
+
+<h2 class="mb-3">Слободни термини</h2>
+
+@* Филтри - Лекар, Датум, Специјалност *@
+<div class="card card-body mb-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Лекар</label>
+            <select id="filterDoctor" class="form-select">
+                <option value="">-- Сите активни лекари --</option>
+                @foreach (var d in Model.Doctors)
+                {
+                    <option value="@d.Value">@d.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Специјалност</label>
+            <select id="filterSpecialty" class="form-select">
+                <option value="">-- Сите --</option>
+                @foreach (var s in Model.Specialties)
+                {
+                    <option value="@s.Value">@s.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Датум <span class="text-danger">*</span></label>
+            <input type="date" id="filterDate" class="form-control" />
+        </div>
+    </div>
+    <div class="form-text mt-2">
+        Изберете датум за да ги видите слободните термини. Ако не изберете конкретен лекар,
+        ќе се прикажат сите активни лекари (или сите од избраната специјалност).
+    </div>
+</div>
+
+@* Контејнер каде AJAX ги вчитува слободните термини *@
+<div id="slotsContainer">
+    <p class="text-muted">Изберете датум за да ги видите слободните термини.</p>
+</div>
+
+@section Scripts {
+<script>
+    // При промена на кој било филтер - автоматски освежи ги слободните термини
+    $('#filterDoctor, #filterSpecialty, #filterDate').on('change', function() {
+        loadSlots();
+    });
+
+    // Вчитај ги слободните термини преку AJAX
+    function loadSlots() {
+        const date = $('#filterDate').val();
+
+        // Без датум - не пробувај да пресметуваш ништо
+        if (!date) {
+            $('#slotsContainer').html('<p class="text-muted">Изберете датум за да ги видите слободните термини.</p>');
+            return;
+        }
+
+        const params = {
+            DoctorId:  $('#filterDoctor').val(),
+            Specialty: $('#filterSpecialty').val(),
+            Date:      date
+        };
+
+        $('#slotsContainer').html(`
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2">Се пресметуваат слободни термини...</p>
+            </div>`);
+
+        $.get('/FreeSlots/LoadSlots', params, function(html) {
+            $('#slotsContainer').html(html);
+        });
+    }
+
+    // При отворање на страницата, постави го денешниот датум по default
+    $(document).ready(function() {
+        $('#filterDate').val(new Date().toISOString().split('T')[0]);
+        loadSlots();
+    });
+</script>
+}

@@ -154,11 +154,42 @@
     </div>
 </div>
 
+@* Модал за завршување на преглед - внесување белешки (Task 9) *@
+<div class="modal fade" id="finishModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">Заврши преглед</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Внесете белешка за завршениот преглед (незадолжително):</p>
+                <form id="finishForm">
+                    @* Безбедносен токен *@
+                    @Html.AntiForgeryToken()
+                    @* ID на терминот кој се завршува *@
+                    <input type="hidden" id="finishAppointmentId" value="0" />
+                    <div class="mb-3">
+                        <label class="form-label">Белешки</label>
+                        <textarea class="form-control" id="finishNotes" rows="3"
+                                  placeholder="Опис на прегледот, наод, препораки..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
+                <button type="button" class="btn btn-primary" onclick="confirmFinishExam()">Заврши преглед</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     // Иницијализација на Bootstrap модали
     const appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
     const deleteModal      = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const finishModal      = new bootstrap.Modal(document.getElementById('finishModal'));
 
     // Глобална променлива за чување на dropdown податоци (лекари, пациенти, статуси)
     let dropdowns = { doctors: [], patients: [], statuses: [] };
@@ -378,6 +409,47 @@
             })
             .fail(function() {
                 alert('Грешка при бришење.');
+            });
+    }
+
+    // ── Task 8: Почеток на преглед ──────────────────────────────────────
+    // Го менува статусот директно од Zakazan во Vo tek, без потврда
+    function startExam(id) {
+        // Земаме токен од кое било постоечко форма на страницата
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        $.post('/Appointments/StartExam', { id: id, __RequestVerificationToken: token })
+            .done(function() {
+                loadTable(); // Освежи ја табелата за да се прикаже новиот статус
+            })
+            .fail(function(xhr) {
+                const response = xhr.responseJSON;
+                alert(response?.errors?.join('\n') || 'Грешка при започнување на прегледот.');
+            });
+    }
+
+    // ── Task 9: Завршување на преглед ───────────────────────────────────
+    // Отвори модал за внесување белешки пред завршување
+    function openFinishModal(id) {
+        document.getElementById('finishAppointmentId').value = id;
+        document.getElementById('finishNotes').value = '';
+        finishModal.show();
+    }
+
+    // Потврди завршување на преглед - испрати статус + белешки до серверот
+    function confirmFinishExam() {
+        const id    = document.getElementById('finishAppointmentId').value;
+        const notes = document.getElementById('finishNotes').value;
+        const token = document.querySelector('#finishForm input[name="__RequestVerificationToken"]').value;
+
+        $.post('/Appointments/FinishExam', { id: id, notes: notes, __RequestVerificationToken: token })
+            .done(function() {
+                finishModal.hide();
+                loadTable(); // Освежи ја табелата
+            })
+            .fail(function(xhr) {
+                const response = xhr.responseJSON;
+                alert(response?.errors?.join('\n') || 'Грешка при завршување на прегледот.');
             });
     }
 </script>

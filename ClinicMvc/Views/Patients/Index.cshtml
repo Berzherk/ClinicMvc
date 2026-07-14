@@ -212,7 +212,7 @@
             if (phone.value.trim()) phone.classList.add('is-valid');
         }
 
-        // Провери формат на е-пошта (мора да содржи и точка)
+        // Провери формат на е-пошта
         const email = document.getElementById('email');
         const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
         if (email.value.trim() && !emailRegex.test(email.value.trim())) {
