@@ -197,7 +197,7 @@
     </div>
 </div>
 
-@* Модал за завршување на преглед - внесување белешки (Task 9) *@
+@* Модал за завршување на преглед - внесување белешки *@
 <div class="modal fade" id="finishModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -505,7 +505,7 @@
             });
     }
 
-    // ── Task 8: Почеток на преглед ────────────────────────────────────
+    // ── Почеток на преглед ────────────────────────────────────
     function startExam(id) {
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
@@ -519,7 +519,7 @@
             });
     }
 
-    // ── Task 9: Завршување на преглед ─────────────────────────────────
+    // ── Завршување на преглед ─────────────────────────────────
     function openFinishModal(id) {
         document.getElementById('finishAppointmentId').value = id;
         document.getElementById('finishNotes').value = '';

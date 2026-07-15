@@ -8,8 +8,8 @@ namespace ClinicMvc.Controllers;
 
 /// <summary>
 /// Контролер за управување со пациенти.
-/// Достапен за Administrator И Doctor (докторите гледаат пациенти заради нивните термини),
-/// но Create/Edit/Delete остануваат ограничени - видете подолу.
+/// Достапен за Administrator и Doctor - двете улоги можат да гледаат и да додаваат пациенти.
+/// Измена и бришење остануваат ограничени само за Administrator.
 /// </summary>
 [Authorize(Roles = "Administrator,Doctor")]
 public class PatientsController : Controller
@@ -35,10 +35,7 @@ public class PatientsController : Controller
         return View(patients);
     }
 
-    /// <summary>
-    /// GET: /Patients/Details/5
-    /// Детали за пациент + медицинска историја (сите претходни термини) - Дел 6.
-    /// </summary>
+    /// <summary>GET: /Patients/Details/5 - детали за пациент и медицинска историја.</summary>
     public async Task<IActionResult> Details(int id)
     {
         var patient = await _patientRepository.GetByIdAsync(id);
@@ -58,8 +55,11 @@ public class PatientsController : Controller
         return Json(patient);
     }
 
-    /// <summary>Само Administrator смее да додава пациенти.</summary>
-    [Authorize(Roles = "Administrator")]
+    /// <summary>
+    /// POST: /Patients/Create
+    /// И Administrator и Doctor смеат да додаваат пациенти - докторите често
+    /// треба да регистрираат нов пациент во моментот на закажување термин.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Patient patient)

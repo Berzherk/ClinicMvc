@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ClinicMvc.Controllers;
 
 /// <summary>
-/// Dashboard за најавен доктор - прикажува само негови/нејзини податоци (Дел 5).
+/// Dashboard за најавен доктор - прикажува само негови/нејзини податоци.
 /// </summary>
 [Authorize(Roles = "Doctor")]
 public class DoctorDashboardController : Controller

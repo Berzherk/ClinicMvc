@@ -1,4 +1,4 @@
-@* Листа на доктори - Ime, Презиме, Специјалност, Акции (Дел 4) *@
+@* Листа на доктори - Ime, Презиме, Специјалност, Акции *@
 @model IEnumerable<Doctor>
 @{
     ViewData["Title"] = "Доктори";
@@ -77,6 +77,26 @@
                         <input type="checkbox" class="form-check-input" id="isActive" name="IsActive" value="true" checked />
                         <label class="form-check-label" for="isActive">Активен</label>
                     </div>
+
+                    @* Полиња за кориснички акредитиви - видливи САМО при креирање нов доктор.
+                       При измена на постоечки доктор, JS ги крие (акредитивите не се менуваат тука). *@
+                    <hr id="credentialsDivider" />
+                    <div id="credentialsSection">
+                        <h6 class="text-muted mb-3">🔐 Кориснички акредитиви за најава</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label">Корисничко ime <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="Username" autocomplete="off" />
+                            <div class="invalid-feedback">Корисничкото ime е задолжително (мин. 3 карактери).</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Лозинка <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="Password" autocomplete="new-password" />
+                            <div class="invalid-feedback">Лозинката мора да има најмалку 6 карактери.</div>
+                        </div>
+                    </div>
+
                     <div id="doctorFormErrors" class="alert alert-danger d-none"></div>
                 </form>
             </div>
@@ -123,6 +143,13 @@
         document.getElementById('specialty').value  = '';
         document.getElementById('phone').value      = '';
         document.getElementById('isActive').checked = true;
+        document.getElementById('username').value   = '';
+        document.getElementById('password').value   = '';
+
+        // Кориснички акредитиви се внесуваат САМО при креирање нов доктор
+        document.getElementById('credentialsSection').classList.remove('d-none');
+        document.getElementById('credentialsDivider').classList.remove('d-none');
+
         clearValidation();
         doctorModal.show();
     }
@@ -136,6 +163,11 @@
             document.getElementById('specialty').value  = doc.specialty || '';
             document.getElementById('phone').value      = doc.phone || '';
             document.getElementById('isActive').checked = doc.isActive;
+
+            // При измена не бараме нови акредитиви - ги криеме тие полиња
+            document.getElementById('credentialsSection').classList.add('d-none');
+            document.getElementById('credentialsDivider').classList.add('d-none');
+
             clearValidation();
             doctorModal.show();
         });
@@ -143,6 +175,8 @@
 
     function validateDoctorForm() {
         let isValid = true;
+        const isCreating = document.getElementById('doctorId').value === '0';
+
         const firstName = document.getElementById('firstName');
         if (!firstName.value.trim()) { firstName.classList.add('is-invalid'); isValid = false; }
         else { firstName.classList.remove('is-invalid'); firstName.classList.add('is-valid'); }
@@ -158,12 +192,24 @@
             phone.classList.remove('is-invalid');
             if (phone.value.trim()) phone.classList.add('is-valid');
         }
+
+        // Username/Password се проверуваат само при креирање (полињата се скриени при измена)
+        if (isCreating) {
+            const username = document.getElementById('username');
+            if (username.value.trim().length < 3) { username.classList.add('is-invalid'); isValid = false; }
+            else { username.classList.remove('is-invalid'); username.classList.add('is-valid'); }
+
+            const password = document.getElementById('password');
+            if (password.value.length < 6) { password.classList.add('is-invalid'); isValid = false; }
+            else { password.classList.remove('is-invalid'); password.classList.add('is-valid'); }
+        }
+
         return isValid;
     }
 
     function clearValidation() {
         document.getElementById('doctorFormErrors').classList.add('d-none');
-        ['firstName', 'lastName', 'specialty', 'phone'].forEach(id => {
+        ['firstName', 'lastName', 'specialty', 'phone', 'username', 'password'].forEach(id => {
             document.getElementById(id).classList.remove('is-invalid', 'is-valid');
         });
     }
@@ -171,7 +217,8 @@
     function saveDoctor() {
         if (!validateDoctorForm()) return;
         const id    = document.getElementById('doctorId').value;
-        const url   = id === '0' ? '/Doctors/Create' : '/Doctors/Edit';
+        const isCreating = id === '0';
+        const url   = isCreating ? '/Doctors/Create' : '/Doctors/Edit';
         const token = document.querySelector('#doctorForm input[name="__RequestVerificationToken"]').value;
 
         const data = {
@@ -183,6 +230,13 @@
             IsActive:  document.getElementById('isActive').checked,
             __RequestVerificationToken: token
         };
+
+        // Username/Password се додаваат во податоците САМО при креирање -
+        // DoctorCreateViewModel на серверот ги очекува само тогаш (Edit прима обичен Doctor модел)
+        if (isCreating) {
+            data.Username = document.getElementById('username').value.trim();
+            data.Password = document.getElementById('password').value;
+        }
 
         $.post(url, data)
             .done(function() { doctorModal.hide(); location.reload(); })

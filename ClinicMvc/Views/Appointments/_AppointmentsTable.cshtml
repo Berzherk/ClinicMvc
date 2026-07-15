@@ -45,14 +45,14 @@
                         <span class="badge @badgeClass">@a.Status</span>
                     </td>
                     <td class="text-nowrap">
-                        @* Копче "Почни преглед" - видливо само за термини во статус Zakazan (Task 8) *@
+                        @* Копче "Почни преглед" - видливо само за термини во статус Zakazan *@
                         @if (a.Status == "Zakazan")
                         {
                             <button class="btn btn-sm btn-success"
                                     onclick="startExam(@a.Id)" title="Започни преглед">▶ Почни</button>
                         }
 
-                        @* Копче "Заврши преглед" - видливо само за термини во статус Vo tek (Task 9) *@
+                        @* Копче "Заврши преглед" - видливо само за термини во статус Vo tek *@
                         @if (a.Status == "Vo tek")
                         {
                             <button class="btn btn-sm btn-secondary"

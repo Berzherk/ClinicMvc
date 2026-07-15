@@ -4,13 +4,10 @@
     ViewData["Title"] = "Пациенти";
 }
 
-@* Наслов и копче за додавање нов пациент - само за Administrator *@
+@* Наслов и копче за додавање нов пациент - достапно за Administrator и Doctor *@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Пациенти</h2>
-    @if (User.IsInRole("Administrator"))
-    {
-        <button class="btn btn-primary" onclick="openCreateModal()">+ Нов пациент</button>
-    }
+    <button class="btn btn-primary" onclick="openCreateModal()">+ Нов пациент</button>
 </div>
 
 @* Табела со листа на пациенти *@

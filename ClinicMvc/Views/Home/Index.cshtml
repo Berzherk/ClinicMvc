@@ -1,12 +1,97 @@
+@* Почетна страница - hero секција + брз пристап зависно од улогата на најавениот корисник *@
 @{
     ViewData["Title"] = "Почетна";
 }
 
-<h1>Систем за закажување термини</h1>
-<p>Проектот е поврзан со Firebird база на податоци преку конфигурацијата во <code>appsettings.json</code>.</p>
+<div class="p-5 mb-4 bg-dark text-white rounded-3">
+    <div class="container-fluid py-3">
+        <h1 class="display-5 fw-bold">🏥 Clinic Management System</h1>
+        <p class="col-md-8 fs-5">
+            Систем за управување со доктори, пациенти и термини во приватна специјалистичка ординација.
+        </p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <p class="mb-0">
+                Најавени сте како
+                <strong>@User.Identity!.Name</strong>
+                (<span class="badge bg-light text-dark">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>)
+            </p>
+        }
+    </div>
+</div>
 
-<ul>
-    <li><a asp-controller="Doctors" asp-action="Index">Преглед на доктори</a></li>
-    <li><a asp-controller="Patients" asp-action="Index">Преглед на пациенти</a></li>
-    <li><a asp-controller="Appointments" asp-action="Index">Преглед на термини</a></li>
-</ul>
+@if (User.IsInRole("Administrator"))
+{
+    <h4 class="mb-3">Брз пристап</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <a asp-controller="Doctors" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">🩺</div>
+                    <h5 class="card-title mt-2">Доктори</h5>
+                    <p class="card-text text-muted small">Управување со доктори и специјалности</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-controller="Patients" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">🧑‍🤝‍🧑</div>
+                    <h5 class="card-title mt-2">Пациенти</h5>
+                    <p class="card-text text-muted small">Регистар на пациенти и медицинска историја</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-controller="Appointments" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">📅</div>
+                    <h5 class="card-title mt-2">Термини</h5>
+                    <p class="card-text text-muted small">Закажување, филтри, статистика</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-controller="AuditLogs" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">📋</div>
+                    <h5 class="card-title mt-2">Логови</h5>
+                    <p class="card-text text-muted small">Преглед на сите CRUD активности</p>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+else if (User.IsInRole("Doctor"))
+{
+    <h4 class="mb-3">Брз пристап</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <a asp-controller="DoctorDashboard" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">📊</div>
+                    <h5 class="card-title mt-2">Мој Dashboard</h5>
+                    <p class="card-text text-muted small">Денешен распоред и преглед</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="Appointments" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">📅</div>
+                    <h5 class="card-title mt-2">Мои термини</h5>
+                    <p class="card-text text-muted small">Закажани, во тек и завршени прегледи</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="Patients" asp-action="Index" class="card text-decoration-none text-dark h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6">🧑‍🤝‍🧑</div>
+                    <h5 class="card-title mt-2">Пациенти</h5>
+                    <p class="card-text text-muted small">Преглед на пациенти и историја</p>
+                </div>
+            </a>
+        </div>
+    </div>
+}

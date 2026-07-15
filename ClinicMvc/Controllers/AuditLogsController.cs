@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicMvc.Controllers;
 
-/// <summary>Преглед на сите CRUD активности - само за Administrator (Дел 9).</summary>
+/// <summary>Преглед на сите CRUD активности - достапен само за Administrator.</summary>
 [Authorize(Roles = "Administrator")]
 public class AuditLogsController : Controller
 {

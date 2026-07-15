@@ -10,48 +10,30 @@
     <p class="text-muted">@Model.Specialty · @DateTime.Today.ToString("dd.MM.yyyy")</p>
 </div>
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-dark text-white">📅 Денешен распоред</div>
-            <div class="card-body">
-                @if (!schedule.Any())
-                {
-                    <p class="text-muted">Нема закажани термини за денес.</p>
-                }
-                else
-                {
-                    <table class="table table-striped">
-                        <thead>
-                            <tr><th>Време</th><th>Пациент</th><th>Статус</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var a in schedule)
-                            {
-                                <tr>
-                                    <td>@a.AppointmentTime.ToString(@"hh\:mm")</td>
-                                    <td>@a.PatientName</td>
-                                    <td><span class="badge bg-info text-dark">@a.Status</span></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h6>Брзи линкови</h6>
-                <a asp-controller="Appointments" asp-action="Index" class="btn btn-primary btn-sm w-100 mb-2">
-                    Сите мои термини
-                </a>
-                <a asp-controller="Patients" asp-action="Index" class="btn btn-outline-secondary btn-sm w-100">
-                    Пациенти
-                </a>
-            </div>
-        </div>
+<div class="card">
+    <div class="card-header bg-dark text-white">📅 Денешен распоред</div>
+    <div class="card-body">
+        @if (!schedule.Any())
+        {
+            <p class="text-muted">Нема закажани термини за денес.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Време</th><th>Пациент</th><th>Статус</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in schedule)
+                    {
+                        <tr>
+                            <td>@a.AppointmentTime.ToString(@"hh\:mm")</td>
+                            <td>@a.PatientName</td>
+                            <td><span class="badge bg-info text-dark">@a.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>
