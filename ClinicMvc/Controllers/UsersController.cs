@@ -33,19 +33,34 @@ public class UsersController : Controller
         _currentUser         = currentUser;
     }
 
-    /// <summary>GET: /Users - листа на сите кориснички сметки, со ime на поврзан доктор ако постои.</summary>
-    public async Task<IActionResult> Index()
-    {
-        var users   = await _userRepository.GetAllAsync();
-        var doctors = await _doctorRepository.GetAllAsync();
+    private const int PageSize = 10;
 
+    /// <summary>GET: /Users?page=2 - листа на кориснички сметки, странирана 10 по страница.</summary>
+    public async Task<IActionResult> Index(int page = 1)
+    {
+        var validPage = page < 1 ? 1 : page;
+
+        var users      = await _userRepository.GetPagedAsync(validPage, PageSize);
+        var totalCount = await _userRepository.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+
+        // Ги полниме поврзаните доктори само за докторите прикажани на тековната страница
+        var allDoctors = await _doctorRepository.GetAllAsync();
         foreach (var user in users)
         {
             if (user.DoctorId.HasValue)
             {
-                user.Doctor = doctors.FirstOrDefault(d => d.Id == user.DoctorId.Value);
+                user.Doctor = allDoctors.FirstOrDefault(d => d.Id == user.DoctorId.Value);
             }
         }
+
+        ViewBag.Pagination = new PaginationInfo
+        {
+            CurrentPage = validPage,
+            TotalPages  = totalPages == 0 ? 1 : totalPages,
+            TotalCount  = totalCount,
+            PageSize    = PageSize
+        };
 
         return View(users);
     }

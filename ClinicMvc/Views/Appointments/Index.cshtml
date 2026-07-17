@@ -111,8 +111,11 @@
     </div>
 
     @* ─────────── Десна страна (col-md-3): Слободни термини ─────────── *@
+    @* sticky-top го задржува панелот видлив додека се скролува страницата, а
+       внатрешниот overflow-y спречува панелот да ја издолжи целата страница
+       кога има многу доктори со слободни термини. *@
     <div class="col-md-3">
-        <div class="card">
+        <div class="card" style="position: sticky; top: 1rem;">
             <div class="card-header bg-dark text-white">Слободни термини</div>
             <div class="card-body">
                 <div class="mb-2">
@@ -140,7 +143,8 @@
                     <input type="date" id="slotsFilterDate" class="form-control form-control-sm" />
                 </div>
 
-                <div id="slotsContainer">
+                @* Фиксна висина + внатрешен скрол - панелот не ја издолжува страницата *@
+                <div id="slotsContainer" style="max-height: 60vh; overflow-y: auto;">
                     <p class="text-muted small mb-0">Изберете датум за да ги видите слободните термини.</p>
                 </div>
             </div>

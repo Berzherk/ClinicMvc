@@ -32,6 +32,32 @@ public class DoctorRepository : IDoctorRepository
         return await connection.QueryAsync<Doctor>(sql);
     }
 
+    /// <summary>
+    /// Странирана листа на активни доктори - 10 по страница (Firebird FIRST/SKIP синтакса).
+    /// </summary>
+    public async Task<IEnumerable<Doctor>> GetPagedAsync(int page, int pageSize)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var validPage = page < 1 ? 1 : page;
+        var skip = (validPage - 1) * pageSize;
+
+        const string sql = @"SELECT FIRST @PageSize SKIP @Skip
+                                ID, FIRSTNAME, LASTNAME, SPECIALTY, PHONE, ISACTIVE,
+                                ISDELETED, CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
+                              FROM DOCTORS
+                              WHERE ISDELETED = FALSE
+                              ORDER BY LASTNAME";
+        return await connection.QueryAsync<Doctor>(sql, new { PageSize = pageSize, Skip = skip });
+    }
+
+    /// <summary>Вкупен број активни доктори - потребен за пресметка на бројот на страници.</summary>
+    public async Task<int> CountAsync()
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = "SELECT COUNT(*) FROM DOCTORS WHERE ISDELETED = FALSE";
+        return await connection.ExecuteScalarAsync<int>(sql);
+    }
+
     public async Task<Doctor?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();

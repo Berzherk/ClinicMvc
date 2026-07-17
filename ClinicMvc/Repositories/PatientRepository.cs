@@ -27,6 +27,30 @@ public class PatientRepository : IPatientRepository
         return await connection.QueryAsync<Patient>(sql);
     }
 
+    /// <summary>Странирана листа на активни пациенти - 10 по страница.</summary>
+    public async Task<IEnumerable<Patient>> GetPagedAsync(int page, int pageSize)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var validPage = page < 1 ? 1 : page;
+        var skip = (validPage - 1) * pageSize;
+
+        const string sql = @"SELECT FIRST @PageSize SKIP @Skip
+                                ID, FIRSTNAME, LASTNAME, EMBG, PHONE, EMAIL,
+                                ISDELETED, CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
+                              FROM PATIENTS
+                              WHERE ISDELETED = FALSE
+                              ORDER BY LASTNAME, FIRSTNAME";
+        return await connection.QueryAsync<Patient>(sql, new { PageSize = pageSize, Skip = skip });
+    }
+
+    /// <summary>Вкупен број активни пациенти.</summary>
+    public async Task<int> CountAsync()
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = "SELECT COUNT(*) FROM PATIENTS WHERE ISDELETED = FALSE";
+        return await connection.ExecuteScalarAsync<int>(sql);
+    }
+
     public async Task<Patient?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();

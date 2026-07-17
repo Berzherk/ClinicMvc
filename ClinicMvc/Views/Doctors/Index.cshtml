@@ -42,6 +42,8 @@
     </tbody>
 </table>
 
+@await Html.PartialAsync("_SimplePagination", (PaginationInfo)ViewBag.Pagination)
+
 @* Модал за креирање и измена на доктор *@
 <div class="modal fade" id="doctorModal" tabindex="-1">
     <div class="modal-dialog">

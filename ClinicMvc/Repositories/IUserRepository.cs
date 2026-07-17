@@ -14,6 +14,13 @@ public interface IUserRepository
     Task<User?> GetByDoctorIdAsync(int doctorId);
 
     Task<IEnumerable<User>> GetAllAsync();
+
+    /// <summary>Странирана листа на кориснички сметки. page почнува од 1.</summary>
+    Task<IEnumerable<User>> GetPagedAsync(int page, int pageSize);
+
+    /// <summary>Вкупен број кориснички сметки.</summary>
+    Task<int> CountAsync();
+
     Task<User?> GetByIdAsync(int id);
     Task<int> CreateAsync(User user);
     Task UpdateAsync(User user);

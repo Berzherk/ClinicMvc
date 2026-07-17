@@ -41,14 +41,6 @@ public class AppointmentsController : Controller
         _currentUser           = currentUser;
     }
 
-    private void ApplyDoctorRestriction(AppointmentFilter filter)
-    {
-        if (_currentUser.IsDoctor && _currentUser.DoctorId.HasValue)
-        {
-            filter.RestrictToDoctorId = _currentUser.DoctorId.Value;
-        }
-    }
-
     public async Task<IActionResult> Index()
     {
         var specialties  = await _doctorRepository.GetSpecialtiesAsync();
@@ -64,10 +56,16 @@ public class AppointmentsController : Controller
         return View(vm);
     }
 
+    // Забелешка: LoadTable/LoadPagination/LoadStatistics НЕ ја ограничуваат листата
+    // само на сопствениот доктор - секој логиран доктор може да ги гледа и филтрира
+    // термините на сите доктори (потребно за филтерот "Ime на лекар" да работи correctно).
+    // Ограничувањето по сопственик останува само на акциите кои МЕНУВААТ податоци
+    // (Create/Edit/StartExam/FinishExam) - таму доктор сепак не смее да допира термини
+    // на друг доктор.
+
     [HttpGet]
     public async Task<IActionResult> LoadTable(AppointmentFilter filter)
     {
-        ApplyDoctorRestriction(filter);
         var appointments = await _appointmentRepository.SearchAsync(filter);
         return PartialView("_AppointmentsTable", appointments);
     }
@@ -75,7 +73,6 @@ public class AppointmentsController : Controller
     [HttpGet]
     public async Task<IActionResult> LoadPagination(AppointmentFilter filter)
     {
-        ApplyDoctorRestriction(filter);
         var totalCount = await _appointmentRepository.CountAsync(filter);
         var currentPage = filter.Page < 1 ? 1 : filter.Page;
         var totalPages  = (int)Math.Ceiling(totalCount / (double)AppointmentFilter.PageSize);
@@ -94,7 +91,6 @@ public class AppointmentsController : Controller
     [HttpGet]
     public async Task<IActionResult> LoadStatistics(AppointmentFilter filter)
     {
-        ApplyDoctorRestriction(filter);
         var stats = await _appointmentRepository.GetStatisticsAsync(filter);
         return PartialView("_Statistics", stats);
     }
@@ -105,9 +101,8 @@ public class AppointmentsController : Controller
         var appointment = await _appointmentRepository.GetByIdAsync(id);
         if (appointment == null) return NotFound();
 
-        if (_currentUser.IsDoctor && appointment.DoctorId != _currentUser.DoctorId)
-            return Forbid();
-
+        // Прегледот на детали е дозволен за сите - ограничувањето по сопственик
+        // е само за менување (Edit/Delete/StartExam/FinishExam подолу).
         return Json(appointment);
     }
 
@@ -212,7 +207,6 @@ public class AppointmentsController : Controller
     [HttpGet]
     public async Task<IActionResult> ExportExcel(AppointmentFilter filter)
     {
-        ApplyDoctorRestriction(filter);
         filter.Page = 1;
 
         var appointments = await GetAllFilteredAsync(filter);
@@ -227,7 +221,6 @@ public class AppointmentsController : Controller
     [HttpGet]
     public async Task<IActionResult> ExportPdf(AppointmentFilter filter)
     {
-        ApplyDoctorRestriction(filter);
         filter.Page = 1;
 
         var appointments = await GetAllFilteredAsync(filter);

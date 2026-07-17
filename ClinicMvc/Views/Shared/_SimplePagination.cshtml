@@ -1,0 +1,39 @@
+@* Заедничка пагинација преку обични линкови (page=N во query string).
+   Се користи на страници кои не се AJAX-управувани (Doctors, Patients, Users, AuditLogs). *@
+@model PaginationInfo
+
+@{
+    bool isFirstPage = Model.CurrentPage <= 1;
+    bool isLastPage  = Model.CurrentPage >= Model.TotalPages;
+}
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted text-center mt-3">Нема пронајдени записи.</p>
+}
+else
+{
+    <nav class="d-flex justify-content-between align-items-center mt-3">
+        @if (isFirstPage)
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled">Претходна</span>
+        }
+        else
+        {
+            <a asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" class="btn btn-outline-secondary btn-sm">Претходна</a>
+        }
+
+        <span class="text-muted small">
+            Страна @Model.CurrentPage од @Model.TotalPages (@Model.TotalCount вкупно)
+        </span>
+
+        @if (isLastPage)
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled">Следна</span>
+        }
+        else
+        {
+            <a asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" class="btn btn-outline-secondary btn-sm">Следна</a>
+        }
+    </nav>
+}

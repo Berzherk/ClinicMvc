@@ -36,6 +36,8 @@
     </tbody>
 </table>
 
+@await Html.PartialAsync("_SimplePagination", (PaginationInfo)ViewBag.Pagination)
+
 @* Модал за ресетирање лозинка *@
 <div class="modal fade" id="resetModal" tabindex="-1">
     <div class="modal-dialog">

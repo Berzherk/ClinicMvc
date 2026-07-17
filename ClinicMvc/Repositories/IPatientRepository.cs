@@ -5,6 +5,13 @@ namespace ClinicMvc.Repositories;
 public interface IPatientRepository
 {
     Task<IEnumerable<Patient>> GetAllAsync();
+
+    /// <summary>Странирана листа на активни пациенти. page почнува од 1.</summary>
+    Task<IEnumerable<Patient>> GetPagedAsync(int page, int pageSize);
+
+    /// <summary>Вкупен број активни (не-избришани) пациенти.</summary>
+    Task<int> CountAsync();
+
     Task<Patient?> GetByIdAsync(int id);
     Task<int> CreateAsync(Patient patient, string createdBy);
     Task UpdateAsync(Patient patient, string modifiedBy);

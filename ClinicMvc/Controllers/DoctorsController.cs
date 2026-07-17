@@ -31,10 +31,25 @@ public class DoctorsController : Controller
         _currentUser            = currentUser;
     }
 
-    /// <summary>GET: /Doctors - листа со Ime, Презиме, Специјалност, Акции.</summary>
-    public async Task<IActionResult> Index()
+    private const int PageSize = 10;
+
+    /// <summary>GET: /Doctors?page=2 - листа со Ime, Презиме, Специјалност, Акции, странирана 10 по страница.</summary>
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var doctors = await _doctorRepository.GetAllAsync();
+        var validPage = page < 1 ? 1 : page;
+
+        var doctors     = await _doctorRepository.GetPagedAsync(validPage, PageSize);
+        var totalCount  = await _doctorRepository.CountAsync();
+        var totalPages  = (int)Math.Ceiling(totalCount / (double)PageSize);
+
+        ViewBag.Pagination = new PaginationInfo
+        {
+            CurrentPage = validPage,
+            TotalPages  = totalPages == 0 ? 1 : totalPages,
+            TotalCount  = totalCount,
+            PageSize    = PageSize
+        };
+
         return View(doctors);
     }
 

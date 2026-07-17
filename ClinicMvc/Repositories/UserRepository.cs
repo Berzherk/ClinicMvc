@@ -51,6 +51,28 @@ public class UserRepository : IUserRepository
         return await connection.QueryAsync<User>(sql);
     }
 
+    /// <summary>Странирана листа на кориснички сметки - 10 по страница.</summary>
+    public async Task<IEnumerable<User>> GetPagedAsync(int page, int pageSize)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var validPage = page < 1 ? 1 : page;
+        var skip = (validPage - 1) * pageSize;
+
+        const string sql = @"SELECT FIRST @PageSize SKIP @Skip
+                                ID, USERNAME, PASSWORDHASH, ROLE, DOCTORID,
+                                CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
+                              FROM USERS ORDER BY USERNAME";
+        return await connection.QueryAsync<User>(sql, new { PageSize = pageSize, Skip = skip });
+    }
+
+    /// <summary>Вкупен број кориснички сметки.</summary>
+    public async Task<int> CountAsync()
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = "SELECT COUNT(*) FROM USERS";
+        return await connection.ExecuteScalarAsync<int>(sql);
+    }
+
     public async Task<User?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();

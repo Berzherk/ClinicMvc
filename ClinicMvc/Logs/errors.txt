@@ -379,3 +379,114 @@ Stack Trace:
 Either com.itextpdf:bouncy-castle-adapter or com.itextpdf:bouncy-castle-fips-adapter dependency must be added in order to use BouncyCastleFactoryCreator
 ========================================================
 
+========================================================
+Дата и време: 2026-07-17 11:33:09
+HTTP метод:   GET
+URL:          /Appointments
+Контролер:    Appointments
+Акција:       Index
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbConnectionInternal.Connect()
+   at FirebirdSql.Data.FirebirdClient.FbConnection.Open()
+   at ClinicMvc.Data.FirebirdConnectionFactory.CreateConnection() in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Data\FirebirdConnectionFactory.cs:line 32
+   at ClinicMvc.Repositories.DoctorRepository.GetSpecialtiesAsync() in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\DoctorRepository.cs:line 103
+   at ClinicMvc.Controllers.AppointmentsController.Index() in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\AppointmentsController.cs:line 54
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+========================================================
+
+========================================================
+Дата и време: 2026-07-17 12:28:09
+HTTP метод:   POST
+URL:          /Account/Login?returnUrl=%2F
+Контролер:    Account
+Акција:       Login
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbConnectionInternal.Connect()
+   at FirebirdSql.Data.FirebirdClient.FbConnection.Open()
+   at ClinicMvc.Data.FirebirdConnectionFactory.CreateConnection() in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Data\FirebirdConnectionFactory.cs:line 32
+   at ClinicMvc.Repositories.UserRepository.GetByUsernameAsync(String username) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\UserRepository.cs:line 26
+   at ClinicMvc.Controllers.AccountController.Login(LoginViewModel model, String returnUrl) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\AccountController.cs:line 48
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+========================================================
+
+========================================================
+Дата и време: 2026-07-17 12:28:28
+HTTP метод:   POST
+URL:          /Account/Login?returnUrl=%2F
+Контролер:    Account
+Акција:       Login
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbConnectionInternal.Connect()
+   at FirebirdSql.Data.FirebirdClient.FbConnection.Open()
+   at ClinicMvc.Data.FirebirdConnectionFactory.CreateConnection() in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Data\FirebirdConnectionFactory.cs:line 32
+   at ClinicMvc.Repositories.UserRepository.GetByUsernameAsync(String username) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\UserRepository.cs:line 26
+   at ClinicMvc.Controllers.AccountController.Login(LoginViewModel model, String returnUrl) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\AccountController.cs:line 48
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\NEW FOLDER\ZADACA1.FDB"
+Error while trying to open file
+========================================================
+

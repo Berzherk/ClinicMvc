@@ -49,7 +49,7 @@
                                     <td>@a.DoctorName</td>
                                     <td>@a.DoctorSpecialty</td>
                                     <td><span class="badge bg-secondary">@a.Status</span></td>
-                                    <td>@(string.IsNullOrEmpty(a.Notes) ? "—" : a.Notes)</td>
+                                    <td class="text-break" style="max-width: 300px;">@(string.IsNullOrEmpty(a.Notes) ? "—" : a.Notes)</td>
                                 </tr>
                             }
                         </tbody>
