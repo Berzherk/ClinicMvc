@@ -30,15 +30,16 @@ public class PatientsController : Controller
 
     private const int PageSize = 10;
 
-    /// <summary>GET: /Patients?page=2 - листа со Ime, Презиме, ЕМБГ, Акции, странирана 10 по страница.</summary>
-    public async Task<IActionResult> Index(int page = 1)
+    /// <summary>GET: /Patients?page=2&amp;FirstName=... - листа со Ime, Презиме, ЕМБГ, Акции, филтрирана и странирана.</summary>
+    public async Task<IActionResult> Index(PatientFilter filter, int page = 1)
     {
         var validPage = page < 1 ? 1 : page;
 
-        var patients   = await _patientRepository.GetPagedAsync(validPage, PageSize);
-        var totalCount = await _patientRepository.CountAsync();
+        var patients   = await _patientRepository.SearchPagedAsync(filter, validPage, PageSize);
+        var totalCount = await _patientRepository.SearchCountAsync(filter);
         var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
 
+        ViewBag.Filter = filter;
         ViewBag.Pagination = new PaginationInfo
         {
             CurrentPage = validPage,

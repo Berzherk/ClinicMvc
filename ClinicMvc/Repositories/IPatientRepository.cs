@@ -12,6 +12,12 @@ public interface IPatientRepository
     /// <summary>Вкупен број активни (не-избришани) пациенти.</summary>
     Task<int> CountAsync();
 
+    /// <summary>Странирано пребарување со филтри (Ime/Презиме/ЕМБГ).</summary>
+    Task<IEnumerable<Patient>> SearchPagedAsync(PatientFilter filter, int page, int pageSize);
+
+    /// <summary>Вкупен број пациенти кои одговараат на филтрите.</summary>
+    Task<int> SearchCountAsync(PatientFilter filter);
+
     Task<Patient?> GetByIdAsync(int id);
     Task<int> CreateAsync(Patient patient, string createdBy);
     Task UpdateAsync(Patient patient, string modifiedBy);

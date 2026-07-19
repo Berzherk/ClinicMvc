@@ -1,10 +1,20 @@
 @* Заедничка пагинација преку обични линкови (page=N во query string).
-   Се користи на страници кои не се AJAX-управувани (Doctors, Patients, Users, AuditLogs). *@
+   Се користи на страници кои не се AJAX-управувани (Doctors, Patients, Users, AuditLogs).
+   ВАЖНО: ги задржува сите тековни query string параметри (филтри) - само "page" се менува,
+   инаку Претходна/Следна би ги избришале активните филтри при пребарување. *@
 @model PaginationInfo
 
 @{
     bool isFirstPage = Model.CurrentPage <= 1;
     bool isLastPage  = Model.CurrentPage >= Model.TotalPages;
+
+    // Изгради query string кој ги задржува сите постоечки параметри освен "page"
+    string BuildPageUrl(int page)
+    {
+        var query = new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>(Context.Request.Query);
+        query["page"] = page.ToString();
+        return Context.Request.Path + QueryString.Create(query);
+    }
 }
 
 @if (Model.TotalCount == 0)
@@ -20,7 +30,7 @@ else
         }
         else
         {
-            <a asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" class="btn btn-outline-secondary btn-sm">Претходна</a>
+            <a href="@BuildPageUrl(Model.CurrentPage - 1)" class="btn btn-outline-secondary btn-sm">Претходна</a>
         }
 
         <span class="text-muted small">
@@ -33,7 +43,7 @@ else
         }
         else
         {
-            <a asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" class="btn btn-outline-secondary btn-sm">Следна</a>
+            <a href="@BuildPageUrl(Model.CurrentPage + 1)" class="btn btn-outline-secondary btn-sm">Следна</a>
         }
     </nav>
 }

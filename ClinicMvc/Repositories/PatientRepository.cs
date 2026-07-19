@@ -51,6 +51,63 @@ public class PatientRepository : IPatientRepository
         return await connection.ExecuteScalarAsync<int>(sql);
     }
 
+    /// <summary>
+    /// Ги гради WHERE условите за филтрите Ime/Презиме/ЕМБГ - заеднички за
+    /// SearchPagedAsync и SearchCountAsync, за да не се повторува иста логика.
+    /// </summary>
+    private static (string WhereClause, DynamicParameters Parameters) BuildWhereClause(PatientFilter filter)
+    {
+        var sb = new System.Text.StringBuilder("WHERE ISDELETED = FALSE");
+        var p  = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.FirstName))
+        {
+            sb.Append(" AND UPPER(FIRSTNAME) LIKE UPPER(@FirstName)");
+            p.Add("FirstName", $"%{filter.FirstName.Trim()}%");
+        }
+        if (!string.IsNullOrWhiteSpace(filter.LastName))
+        {
+            sb.Append(" AND UPPER(LASTNAME) LIKE UPPER(@LastName)");
+            p.Add("LastName", $"%{filter.LastName.Trim()}%");
+        }
+        if (!string.IsNullOrWhiteSpace(filter.Embg))
+        {
+            sb.Append(" AND EMBG LIKE @Embg");
+            p.Add("Embg", $"%{filter.Embg.Trim()}%");
+        }
+
+        return (sb.ToString(), p);
+    }
+
+    /// <summary>Странирано пребарување на пациенти според филтрите.</summary>
+    public async Task<IEnumerable<Patient>> SearchPagedAsync(PatientFilter filter, int page, int pageSize)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var (where, p) = BuildWhereClause(filter);
+
+        var validPage = page < 1 ? 1 : page;
+        p.Add("PageSize", pageSize);
+        p.Add("Skip", (validPage - 1) * pageSize);
+
+        var sql = $@"SELECT FIRST @PageSize SKIP @Skip
+                        ID, FIRSTNAME, LASTNAME, EMBG, PHONE, EMAIL,
+                        ISDELETED, CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
+                     FROM PATIENTS
+                     {where}
+                     ORDER BY LASTNAME, FIRSTNAME";
+        return await connection.QueryAsync<Patient>(sql, p);
+    }
+
+    /// <summary>Вкупен број пациенти кои одговараат на филтрите.</summary>
+    public async Task<int> SearchCountAsync(PatientFilter filter)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var (where, p) = BuildWhereClause(filter);
+
+        var sql = $"SELECT COUNT(*) FROM PATIENTS {where}";
+        return await connection.ExecuteScalarAsync<int>(sql, p);
+    }
+
     public async Task<Patient?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();

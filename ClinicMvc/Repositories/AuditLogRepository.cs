@@ -57,4 +57,70 @@ public class AuditLogRepository : IAuditLogRepository
         const string sql = "SELECT COUNT(*) FROM AUDITLOGS";
         return await connection.ExecuteScalarAsync<int>(sql);
     }
+
+    /// <summary>
+    /// Ги гради WHERE условите за филтрите - заеднички за SearchPagedAsync и SearchCountAsync.
+    /// </summary>
+    private static (string WhereClause, DynamicParameters Parameters) BuildWhereClause(AuditLogFilter filter)
+    {
+        var sb = new System.Text.StringBuilder("WHERE 1=1");
+        var p  = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.ActionType))
+        {
+            sb.Append(" AND ACTIONTYPE = @ActionType");
+            p.Add("ActionType", filter.ActionType);
+        }
+        if (!string.IsNullOrWhiteSpace(filter.EntityName))
+        {
+            sb.Append(" AND ENTITYNAME = @EntityName");
+            p.Add("EntityName", filter.EntityName);
+        }
+        if (!string.IsNullOrWhiteSpace(filter.Username))
+        {
+            sb.Append(" AND UPPER(USERNAME) LIKE UPPER(@Username)");
+            p.Add("Username", $"%{filter.Username.Trim()}%");
+        }
+        if (filter.DateFrom.HasValue)
+        {
+            sb.Append(" AND LOGDATETIME >= @DateFrom");
+            p.Add("DateFrom", filter.DateFrom.Value.Date);
+        }
+        if (filter.DateTo.HasValue)
+        {
+            // До крајот на избраниот ден (23:59:59), инаку записите ОД тој ден би отпаднале
+            sb.Append(" AND LOGDATETIME < @DateTo");
+            p.Add("DateTo", filter.DateTo.Value.Date.AddDays(1));
+        }
+
+        return (sb.ToString(), p);
+    }
+
+    /// <summary>Странирано пребарување на логови според филтрите.</summary>
+    public async Task<IEnumerable<AuditLog>> SearchPagedAsync(AuditLogFilter filter, int page, int pageSize)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var (where, p) = BuildWhereClause(filter);
+
+        var validPage = page < 1 ? 1 : page;
+        p.Add("PageSize", pageSize);
+        p.Add("Skip", (validPage - 1) * pageSize);
+
+        var sql = $@"SELECT FIRST @PageSize SKIP @Skip
+                        ID, ACTIONTYPE, ENTITYNAME, ENTITYID, USERNAME, LOGDATETIME, DESCRIPTION
+                     FROM AUDITLOGS
+                     {where}
+                     ORDER BY LOGDATETIME DESC";
+        return await connection.QueryAsync<AuditLog>(sql, p);
+    }
+
+    /// <summary>Вкупен број логови кои одговараат на филтрите.</summary>
+    public async Task<int> SearchCountAsync(AuditLogFilter filter)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var (where, p) = BuildWhereClause(filter);
+
+        var sql = $"SELECT COUNT(*) FROM AUDITLOGS {where}";
+        return await connection.ExecuteScalarAsync<int>(sql, p);
+    }
 }

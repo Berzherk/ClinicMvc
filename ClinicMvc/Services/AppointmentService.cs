@@ -36,7 +36,7 @@ public class AppointmentService : IAppointmentService
 
         if (await _appointmentRepository.HasConflictAsync(
                 appointment.DoctorId, appointment.AppointmentDate, appointment.AppointmentTime))
-            errors.Add("Докторот веќе има термин во тоа датум и време.");
+            errors.Add("Не може да се закаже овој термин. Докторот веќе има термин во период од 15 минути од избраното време.");
 
         if (errors.Count > 0)
             return (false, 0, errors);
@@ -61,7 +61,7 @@ public class AppointmentService : IAppointmentService
 
         if (await _appointmentRepository.HasConflictAsync(
                 appointment.DoctorId, appointment.AppointmentDate, appointment.AppointmentTime, appointment.Id))
-            errors.Add("Докторот веќе има термин во тоа датум и време.");
+            errors.Add("Не може да се закаже овој термин. Докторот веќе има термин во период од 15 минути од избраното време.");
 
         if (errors.Count > 0)
             return (false, errors);

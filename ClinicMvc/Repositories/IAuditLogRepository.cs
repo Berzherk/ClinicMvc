@@ -12,4 +12,10 @@ public interface IAuditLogRepository
 
     /// <summary>Вкупен број записи - потребен за пресметка на бројот на страници.</summary>
     Task<int> CountAsync();
+
+    /// <summary>Странирано пребарување со филтри (тип на акција, ентитет, корисник, датумски опсег).</summary>
+    Task<IEnumerable<AuditLog>> SearchPagedAsync(AuditLogFilter filter, int page, int pageSize);
+
+    /// <summary>Вкупен број записи кои одговараат на филтрите.</summary>
+    Task<int> SearchCountAsync(AuditLogFilter filter);
 }

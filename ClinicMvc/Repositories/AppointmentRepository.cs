@@ -212,18 +212,40 @@ public class AppointmentRepository : IAppointmentRepository
         await connection.ExecuteAsync(sql, new { Id = id, ModifiedBy = modifiedBy });
     }
 
+    /// <summary>
+    /// Проверува дали новиот/изменетиот термин паѓа премногу близу до постоечки термин
+    /// за ИСТИОТ доктор на ИСТИОТ датум. Бара минимум 15 минути слободно време
+    /// и пред и по секој термин (се дозволува слободен избор на време, не фиксни слотови).
+    /// excludeId - ID на терминот кој се игнорира (при измена на постоечки термин).
+    /// </summary>
     public async Task<bool> HasConflictAsync(int doctorId, DateTime date, TimeSpan time, int excludeId = 0)
     {
         using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"SELECT COUNT(*) FROM APPOINTMENTS
+
+        // Ги земаме СИТЕ времиња на терминиte на овој доктор за тој датум
+        // (пресметката на минималната разлика се прави во C#, не во SQL,
+        // бидејќи Firebird нема удобна ABS/TIME-diff функција преку Dapper параметри)
+        const string sql = @"SELECT APPOINTMENTTIME FROM APPOINTMENTS
                               WHERE DOCTORID        = @DoctorId
                                 AND APPOINTMENTDATE = @Date
-                                AND APPOINTMENTTIME = @Time
                                 AND ID             <> @ExcludeId
                                 AND ISDELETED       = FALSE";
-        var count = await connection.ExecuteScalarAsync<int>(sql,
-            new { DoctorId = doctorId, Date = date.Date, Time = time, ExcludeId = excludeId });
-        return count > 0;
+        var existingTimes = await connection.QueryAsync<TimeSpan>(sql,
+            new { DoctorId = doctorId, Date = date.Date, ExcludeId = excludeId });
+
+        const int bufferMinutes = 15;
+
+        // Ако разликата до кој било постоечки термин е 15 минути или помалку - конфликт
+        foreach (var existingTime in existingTimes)
+        {
+            var diffMinutes = Math.Abs((time - existingTime).TotalMinutes);
+            if (diffMinutes <= bufferMinutes)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public async Task UpdateStatusAsync(int id, string newStatus, string modifiedBy, string? notes = null)
