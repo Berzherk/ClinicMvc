@@ -30,27 +30,6 @@ public class UserRepository : IUserRepository
         return await connection.QueryFirstOrDefaultAsync<User>(sql, new { Username = username });
     }
 
-    /// <summary>
-    /// Го враќа корисничкиот запис поврзан со конкретен доктор (ако постои).
-    /// </summary>
-    public async Task<User?> GetByDoctorIdAsync(int doctorId)
-    {
-        using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"SELECT ID, USERNAME, PASSWORDHASH, ROLE, DOCTORID,
-                                     CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
-                              FROM USERS WHERE DOCTORID = @DoctorId";
-        return await connection.QueryFirstOrDefaultAsync<User>(sql, new { DoctorId = doctorId });
-    }
-
-    public async Task<IEnumerable<User>> GetAllAsync()
-    {
-        using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"SELECT ID, USERNAME, PASSWORDHASH, ROLE, DOCTORID,
-                                     CREATEDON, CREATEDBY, MODIFIEDON, MODIFIEDBY
-                              FROM USERS ORDER BY USERNAME";
-        return await connection.QueryAsync<User>(sql);
-    }
-
     /// <summary>Странирана листа на кориснички сметки - 10 по страница.</summary>
     public async Task<IEnumerable<User>> GetPagedAsync(int page, int pageSize)
     {
@@ -91,19 +70,6 @@ public class UserRepository : IUserRepository
                                 (@Username, @PasswordHash, @Role, @DoctorId, CURRENT_TIMESTAMP, @CreatedBy)
                               RETURNING ID";
         return await connection.ExecuteScalarAsync<int>(sql, user);
-    }
-
-    public async Task UpdateAsync(User user)
-    {
-        using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"UPDATE USERS SET
-                                USERNAME     = @Username,
-                                ROLE         = @Role,
-                                DOCTORID     = @DoctorId,
-                                MODIFIEDON   = CURRENT_TIMESTAMP,
-                                MODIFIEDBY   = @ModifiedBy
-                              WHERE ID = @Id";
-        await connection.ExecuteAsync(sql, user);
     }
 
     public async Task DeleteAsync(int id)

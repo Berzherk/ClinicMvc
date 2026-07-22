@@ -23,22 +23,6 @@ public class AppointmentRepository : IAppointmentRepository
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<IEnumerable<Appointment>> GetAllAsync()
-    {
-        using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"
-            SELECT
-                a.ID, a.DOCTORID, a.PARIENTID AS PATIENTID,
-                a.APPOINTMENTDATE, a.APPOINTMENTTIME, a.STATUS, a.NOTES,
-                (d.FIRSTNAME || ' ' || d.LASTNAME) AS DOCTORNAME,
-                (p.FIRSTNAME || ' ' || p.LASTNAME) AS PATIENTNAME,
-                d.SPECIALTY AS DOCTORSPECIALTY
-            " + FromJoinSql + @"
-            WHERE a.ISDELETED = FALSE
-            ORDER BY a.APPOINTMENTDATE, a.APPOINTMENTTIME";
-        return await connection.QueryAsync<Appointment>(sql);
-    }
-
     /// <summary>
     /// Ги гради WHERE условите за филтрите. Секогаш ISDELETED = FALSE (Soft Delete правило).
     /// Ако RestrictToDoctorId е поставен (доктор-корисник) - дополнително ги ограничува резултатите.

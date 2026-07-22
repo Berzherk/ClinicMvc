@@ -6,13 +6,7 @@ public interface IPatientRepository
 {
     Task<IEnumerable<Patient>> GetAllAsync();
 
-    /// <summary>Странирана листа на активни пациенти. page почнува од 1.</summary>
-    Task<IEnumerable<Patient>> GetPagedAsync(int page, int pageSize);
-
-    /// <summary>Вкупен број активни (не-избришани) пациенти.</summary>
-    Task<int> CountAsync();
-
-    /// <summary>Странирано пребарување со филтри (Ime/Презиме/ЕМБГ).</summary>
+    /// <summary>Странирано пребарување со филтри (Ime/Презиме/ЕМБГ). Без филтри = сите активни.</summary>
     Task<IEnumerable<Patient>> SearchPagedAsync(PatientFilter filter, int page, int pageSize);
 
     /// <summary>Вкупен број пациенти кои одговараат на филтрите.</summary>

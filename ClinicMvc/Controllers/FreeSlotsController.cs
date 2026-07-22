@@ -2,13 +2,14 @@ using ClinicMvc.Models;
 using ClinicMvc.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ClinicMvc.Controllers;
 
 /// <summary>
 /// Контролер за приказ на слободни термини.
 /// Достапен и за Administrator и за Doctor.
+/// Забелешка: нема самостојна страница - LoadSlots се повикува преку AJAX
+/// директно од панелот "Слободни термини" на страницата /Appointments.
 /// </summary>
 [Authorize(Roles = "Administrator,Doctor")]
 public class FreeSlotsController : Controller
@@ -29,29 +30,6 @@ public class FreeSlotsController : Controller
     {
         _doctorRepository      = doctorRepository;
         _appointmentRepository = appointmentRepository;
-    }
-
-    /// <summary>
-    /// GET: /FreeSlots
-    /// Ја вчитува страницата со филтри (Лекар, Датум, Специјалност).
-    /// </summary>
-    public async Task<IActionResult> Index()
-    {
-        var doctors     = await _doctorRepository.GetAllAsync();
-        var specialties = await _doctorRepository.GetSpecialtiesAsync();
-
-        var vm = new FreeSlotsViewModel
-        {
-            Filter      = new FreeSlotsFilter(),
-            FreeSlots   = Enumerable.Empty<FreeSlot>(),
-            // Само активни лекари може да имаат слободни термини
-            Doctors     = doctors.Where(d => d.IsActive)
-                .Select(d => new SelectListItem(d.FullName, d.Id.ToString())).ToList(),
-            Specialties = specialties
-                .Select(s => new SelectListItem(s, s)).ToList()
-        };
-
-        return View(vm);
     }
 
     /// <summary>

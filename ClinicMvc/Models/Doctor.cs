@@ -47,10 +47,4 @@ public class Doctor
     /// Не се зачувува во базата, само за приказ.
     /// </summary>
     public string FullName => $"{FirstName} {LastName}";
-
-    /// <summary>
-    /// Навигационо поле - поврзаната корисничка сметка (ако постои).
-    /// Не се вчитува автоматски преку Dapper - се полни рачно по потреба.
-    /// </summary>
-    public User? User { get; set; }
 }

@@ -53,3 +53,46 @@ body {
     font-size: 1.5rem;
     margin: 0 auto;
 }
+
+/* ── Општо освежување низ целата апликација ── */
+
+/* Табелите добиваат сина/темна боја на заглавието наместо чисто црна, заоблени рабови и сенка */
+.table {
+    background: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+}
+
+.table thead.table-dark th {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border-color: #1a252f;
+}
+
+/* Картичките (филтри, статистика, детали) добиваат мека сенка и заоблени рабови */
+.card {
+    border: none;
+    border-radius: 0.6rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+}
+
+.card-header.bg-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%) !important;
+    border-radius: 0.6rem 0.6rem 0 0;
+}
+
+/* Копчињата добиваат малку помеки рабови */
+.btn {
+    border-radius: 0.4rem;
+}
+
+/* Badge-овите малку поголеми и почитливи */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.65em;
+}
+
+/* Навбарот со мала сенка за да се одвои од содржината */
+.navbar {
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+}

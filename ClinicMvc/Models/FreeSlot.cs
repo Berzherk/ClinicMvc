@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
-
 namespace ClinicMvc.Models;
 
 /// <summary>
@@ -23,17 +21,4 @@ public class FreeSlotsFilter
     public int? DoctorId { get; set; }
     public string? Specialty { get; set; }
     public DateTime? Date { get; set; }
-}
-
-/// <summary>
-/// ViewModel за страницата со слободни термини.
-/// Содржи филтри, dropdown опции и листа на пронајдени слободни термини.
-/// </summary>
-public class FreeSlotsViewModel
-{
-    public FreeSlotsFilter Filter { get; set; } = new();
-    public IEnumerable<FreeSlot> FreeSlots { get; set; } = Enumerable.Empty<FreeSlot>();
-
-    public List<SelectListItem> Doctors { get; set; } = new();
-    public List<SelectListItem> Specialties { get; set; } = new();
 }

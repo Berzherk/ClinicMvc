@@ -4,7 +4,6 @@ namespace ClinicMvc.Repositories;
 
 public interface IAppointmentRepository
 {
-    Task<IEnumerable<Appointment>> GetAllAsync();
     Task<IEnumerable<Appointment>> SearchAsync(AppointmentFilter filter);
     Task<int> CountAsync(AppointmentFilter filter);
     Task<AppointmentStatistics> GetStatisticsAsync(AppointmentFilter filter);
