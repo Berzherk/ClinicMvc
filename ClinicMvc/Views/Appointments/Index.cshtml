@@ -10,7 +10,7 @@
     <div class="d-flex gap-2">
         <a id="exportExcelBtn" href="#" class="btn btn-outline-success btn-sm">Export Excel</a>
         <a id="exportPdfBtn" href="#" class="btn btn-outline-danger btn-sm">Export PDF</a>
-        <button class="btn btn-primary" onclick="openCreateModal()">+ Нов термин</button>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ Нов термински слот</button>
     </div>
 </div>
 
@@ -152,61 +152,47 @@
     </div>
 </div>
 
-@* Модал за креирање и измена на термин *@
+@* Модал за креирање и измена на термински слот - САМО Doctor/Date/Time.
+   Пациентот НИКОГАШ не се доделува рачно овде - тоа го прави пациентот сам
+   преку резервација на слотот (PatientPortal). *@
 <div class="modal fade" id="appointmentModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="appointmentModalTitle">Нов термин</h5>
+                <h5 class="modal-title" id="appointmentModalTitle">Нов термински слот</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="appointmentForm">
                     @* Безбедносен токен за заштита од CSRF напади *@
                     @Html.AntiForgeryToken()
-                    @* Скриено поле за ID - 0 значи нов термин, поинаку е измена *@
+                    @* Скриено поле за ID - 0 значи нов слот, поинаку е измена *@
                     <input type="hidden" id="appointmentId" name="Id" value="0" />
 
-                    <div class="row">
-                        @* Dropdown за избор на лекар - се полни преку AJAX *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Лекар <span class="text-danger">*</span></label>
-                            <select class="form-select" id="doctorId" name="DoctorId" required>
-                                <option value="">-- Избери лекар --</option>
-                            </select>
-                        </div>
-                        @* Dropdown за избор на пациент - се полни преку AJAX *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Пациент <span class="text-danger">*</span></label>
-                            <select class="form-select" id="patientId" name="PatientId" required>
-                                <option value="">-- Избери пациент --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @* Датум на термин - не смее да биде во минатото *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Датум <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="appointmentDate"
-                                   name="AppointmentDate" required />
-                        </div>
-                        @* Време на термин *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Време <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="appointmentTime"
-                                   name="AppointmentTime" required />
-                        </div>
-                    </div>
-                    @* Статус на термин - се полни преку AJAX *@
+                    @* Dropdown за избор на лекар - се полни преку AJAX *@
                     <div class="mb-3">
-                        <label class="form-label">Статус</label>
-                        <select class="form-select" id="status" name="Status"></select>
+                        <label class="form-label">Лекар <span class="text-danger">*</span></label>
+                        <select class="form-select" id="doctorId" name="DoctorId" required>
+                            <option value="">-- Избери лекар --</option>
+                        </select>
                     </div>
-                    @* Белешки за терминот *@
+
+                    @* Датум на слотот - не смее да биде во минатото *@
                     <div class="mb-3">
-                        <label class="form-label">Белешки</label>
-                        <textarea class="form-control" id="notes" name="Notes" rows="2"></textarea>
+                        <label class="form-label">Датум <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="appointmentDate"
+                               name="Date" required />
                     </div>
+
+                    @* Време на слотот - само од фиксната мрежа на секои 30 минути (08:00-16:00),
+                       не смее да се внесе произволно време. Опциите ги генерира JS (fillTimeOptions). *@
+                    <div class="mb-3">
+                        <label class="form-label">Време <span class="text-danger">*</span></label>
+                        <select class="form-select" id="appointmentTime" name="Time" required>
+                            <option value="">-- Избери време --</option>
+                        </select>
+                    </div>
+
                     @* Порака за грешка - скриена по default, се прикажува при валидациска грешка *@
                     <div id="appointmentFormErrors" class="alert alert-danger d-none"></div>
                 </form>
@@ -228,11 +214,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Дали сте сигурни дека сакате да го избришете овој термин?</p>
+                <p>Дали сте сигурни дека сакате да го избришете овој термин/слот?</p>
                 <form id="deleteForm">
-                    @* Безбедносен токен *@
                     @Html.AntiForgeryToken()
-                    @* ID на терминот кој се брише *@
                     <input type="hidden" id="deleteAppointmentId" value="0" />
                 </form>
             </div>
@@ -244,31 +228,56 @@
     </div>
 </div>
 
-@* Модал за завршување на преглед - внесување белешки *@
-<div class="modal fade" id="finishModal" tabindex="-1">
+@* Модал за означување термин како завршен *@
+<div class="modal fade" id="completeModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title">Заврши преглед</h5>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Означи термин како завршен</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Внесете белешка за завршениот преглед (незадолжително):</p>
-                <form id="finishForm">
-                    @* Безбедносен токен *@
+                <p>Внесете белешка за прегледот (незадолжително):</p>
+                <form id="completeForm">
                     @Html.AntiForgeryToken()
-                    @* ID на терминот кој се завршува *@
-                    <input type="hidden" id="finishAppointmentId" value="0" />
+                    <input type="hidden" id="completeAppointmentId" value="0" />
                     <div class="mb-3">
                         <label class="form-label">Белешки</label>
-                        <textarea class="form-control" id="finishNotes" rows="3"
+                        <textarea class="form-control" id="completeNotes" rows="3"
                                   placeholder="Опис на прегледот, наод, препораки..."></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
-                <button type="button" class="btn btn-primary" onclick="confirmFinishExam()">Заврши преглед</button>
+                <button type="button" class="btn btn-success" onclick="confirmComplete()">Заврши</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Модал за откажување резервиран термин - пациентот се известува по е-пошта *@
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Откажи термин</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Пациентот автоматски ќе биде известен по е-пошта дека терминот е откажан.</p>
+                <form id="cancelForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="cancelAppointmentId" value="0" />
+                    <div class="mb-3">
+                        <label class="form-label">Причина за откажување (незадолжително)</label>
+                        <textarea class="form-control" id="cancelReason" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Назад</button>
+                <button type="button" class="btn btn-danger" onclick="confirmCancel()">Откажи термин</button>
             </div>
         </div>
     </div>
@@ -279,13 +288,13 @@
     // Иницијализација на Bootstrap модали
     const appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
     const deleteModal      = new bootstrap.Modal(document.getElementById('deleteModal'));
-    const finishModal      = new bootstrap.Modal(document.getElementById('finishModal'));
+    const completeModal    = new bootstrap.Modal(document.getElementById('completeModal'));
+    const cancelModal      = new bootstrap.Modal(document.getElementById('cancelModal'));
 
-    // Глобална променлива за чување на dropdown податоци (лекари, пациенти, статуси) - за модалот
-    let dropdowns = { doctors: [], patients: [], statuses: [] };
+    // Глобална променлива за чување на dropdown податоци (лекари) - за модалот
+    let dropdowns = { doctors: [], statuses: [] };
 
     // Глобална состојба на dashboard-от: тековна страница и насока на сортирање.
-    // Филтрите и колоната за сортирање се читаат директно од полињата при секој повик.
     let currentPage      = 1;
     let sortDirection     = 'asc';
 
@@ -343,7 +352,6 @@
     }
 
     // ── Комбинирано освежување: табела + пагинација + статистика ───────
-    // Се повикува при промена на филтри или сортирање (сите три треба да се синхронизирани)
     function refreshAll() {
         loadTable();
         loadPagination();
@@ -352,7 +360,6 @@
     }
 
     // ── Комбинирано освежување само на табела + пагинација ──────────────
-    // Се повикува при промена на страница - статистиката не зависи од страницата
     function refreshTableOnly() {
         loadTable();
         loadPagination();
@@ -372,22 +379,18 @@
         refreshAll();
     }
 
-    // Едноставен debounce за текстуалните полиња - чека 400ms по последното копче
-    // за да не се прати барање на секој внесен карактер
+    // Едноставен debounce за текстуалните полиња
     let debounceTimer;
     function debouncedFilterChange() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(onFilterChanged, 400);
     }
 
-    // Текстуални филтри - debounce на 'input' настан (додека се пишува)
     $('#filterPatientFirstName, #filterPatientLastName, #filterPatientEmbg, #filterDoctorName')
         .on('input', debouncedFilterChange);
 
-    // Dropdown и датум филтри - веднаш при промена ('change' настан)
     $('#filterSpecialty, #filterDate').on('change', onFilterChanged);
 
-    // ── Исчисти ги сите филтри и освежи ──────────────────────────────────
     function clearFilters() {
         $('#filterPatientFirstName, #filterPatientLastName, #filterPatientEmbg, #filterDoctorName').val('');
         $('#filterSpecialty').val('');
@@ -395,14 +398,11 @@
         onFilterChanged();
     }
 
-    // ── Сортирање ─────────────────────────────────────────────────────
-    // При промена на колоната за сортирање - врати се на страница 1
     $('#sortBy').on('change', function() {
         currentPage = 1;
         refreshTableOnly();
     });
 
-    // Копче за смена на насока (растечки/опаѓачки)
     function toggleSortDirection() {
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
         const btn = document.getElementById('sortDirectionBtn');
@@ -413,27 +413,18 @@
 
     // ── При вчитување на страницата ──────────────────────────────────────
     $(document).ready(function() {
-        // Вчитај ги лекарите, пациентите и статусите за употреба во Create/Edit модалот
         $.get('/Appointments/GetDropdowns', function(data) {
             dropdowns = data;
         });
-        // Прикажи ги термините, статистиката и пагинацијата при прво отворање
         refreshAll();
 
-        // Слободни термини - постави го денешниот датум по default и вчитај
         $('#slotsFilterDate').val(new Date().toISOString().split('T')[0]);
         loadFreeSlots();
     });
 
     // ── Панел за слободни термини (десна страна) ─────────────────────────
-    // Го користи веќе постоечкиот /FreeSlots/LoadSlots endpoint и Partial View
     function loadFreeSlots() {
         const date = $('#slotsFilterDate').val();
-
-        if (!date) {
-            $('#slotsContainer').html('<p class="text-muted small mb-0">Изберете датум за да ги видите слободните термини.</p>');
-            return;
-        }
 
         const params = {
             DoctorId:  $('#slotsFilterDoctor').val(),
@@ -453,64 +444,65 @@
 
     $('#slotsFilterDoctor, #slotsFilterSpecialty, #slotsFilterDate').on('change', loadFreeSlots);
 
-    // ── Полнење на dropdown-ите во Create/Edit модалот ──────────────────
-    function fillDropdowns(selectedDoctorId, selectedPatientId, selectedStatus) {
+    // ── Полнење на dropdown за лекар во Create/Edit модалот ──────────────
+    function fillDropdowns(selectedDoctorId) {
         const doctorSel  = document.getElementById('doctorId');
-        const patientSel = document.getElementById('patientId');
-        const statusSel  = document.getElementById('status');
-
         doctorSel.innerHTML  = '<option value="">-- Избери лекар --</option>';
-        patientSel.innerHTML = '<option value="">-- Избери пациент --</option>';
-        statusSel.innerHTML  = '';
-
         dropdowns.doctors.forEach(d => {
             doctorSel.appendChild(new Option(d.name, d.id, false, d.id == selectedDoctorId));
         });
-        dropdowns.patients.forEach(p => {
-            patientSel.appendChild(new Option(p.name, p.id, false, p.id == selectedPatientId));
-        });
-        dropdowns.statuses.forEach(s => {
-            statusSel.appendChild(new Option(s, s, false, s === selectedStatus));
-        });
     }
 
-    // ── Отвори модал за креирање нов термин ──────────────────────────────
+    // ── Полнење на dropdown за време - само фиксни термини на секои 30 минути,
+    //    во работно време 08:00-16:00. Ова е единствениот избор - не смее да се
+    //    внесе произволно време (истата мрежа што порано ја користеше панелот
+    //    "Слободни термини" пред слотовите да станат зачувани редови). ──────
+    function fillTimeOptions(selectedTime) {
+        const timeSel = document.getElementById('appointmentTime');
+        timeSel.innerHTML = '<option value="">-- Избери време --</option>';
+
+        const startMinutes = 8 * 60;   // 08:00
+        const endMinutes   = 16 * 60;  // 16:00 (исклучително - последен слот е 15:30)
+
+        for (let m = startMinutes; m < endMinutes; m += 30) {
+            const hh = String(Math.floor(m / 60)).padStart(2, '0');
+            const mm = String(m % 60).padStart(2, '0');
+            const value = `${hh}:${mm}`;
+            timeSel.appendChild(new Option(value, value, false, value === selectedTime));
+        }
+    }
+
+    // ── Отвори модал за креирање нов термински слот ──────────────────────
     function openCreateModal() {
-        document.getElementById('appointmentModalTitle').textContent = 'Нов термин';
+        document.getElementById('appointmentModalTitle').textContent = 'Нов термински слот';
         document.getElementById('appointmentId').value   = '0';
         document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('appointmentTime').value = '';
-        document.getElementById('notes').value           = '';
         clearAppointmentValidation();
-        fillDropdowns(0, 0, dropdowns.statuses?.[0]);
+        fillDropdowns(0);
+        fillTimeOptions('');
         appointmentModal.show();
     }
 
-    // ── Отвори модал за измена на постоечки термин ───────────────────────
+    // ── Отвори модал за измена на постоечки слободен слот ─────────────────
     function openEditModal(id) {
         $.get(`/Appointments/GetById/${id}`, function(a) {
-            document.getElementById('appointmentModalTitle').textContent = 'Измени термин';
+            document.getElementById('appointmentModalTitle').textContent = 'Измени термински слот';
             document.getElementById('appointmentId').value   = a.id;
             document.getElementById('appointmentDate').value = a.appointmentDate?.split('T')[0];
-            document.getElementById('appointmentTime').value = a.appointmentTime?.substring(0, 5);
-            document.getElementById('notes').value           = a.notes || '';
             clearAppointmentValidation();
-            fillDropdowns(a.doctorId, a.patientId, a.status);
+            fillDropdowns(a.doctorId);
+            fillTimeOptions(a.appointmentTime?.substring(0, 5));
             appointmentModal.show();
         });
     }
 
-    // ── Клиентска валидација на формата за термин ────────────────────────
+    // ── Клиентска валидација на формата за слот ────────────────────────
     function validateAppointmentForm() {
         let isValid = true;
 
         const doctorId = document.getElementById('doctorId');
         if (!doctorId.value) { doctorId.classList.add('is-invalid'); isValid = false; }
         else { doctorId.classList.remove('is-invalid'); doctorId.classList.add('is-valid'); }
-
-        const patientId = document.getElementById('patientId');
-        if (!patientId.value) { patientId.classList.add('is-invalid'); isValid = false; }
-        else { patientId.classList.remove('is-invalid'); patientId.classList.add('is-valid'); }
 
         const appointmentDate = document.getElementById('appointmentDate');
         if (!appointmentDate.value) { appointmentDate.classList.add('is-invalid'); isValid = false; }
@@ -525,12 +517,12 @@
 
     function clearAppointmentValidation() {
         document.getElementById('appointmentFormErrors').classList.add('d-none');
-        ['doctorId', 'patientId', 'appointmentDate', 'appointmentTime'].forEach(id => {
+        ['doctorId', 'appointmentDate', 'appointmentTime'].forEach(id => {
             document.getElementById(id).classList.remove('is-invalid', 'is-valid');
         });
     }
 
-    // ── Зачувај термин - Create или Edit зависно од ID ───────────────────
+    // ── Зачувај термински слот - Create или Edit зависно од ID ───────────
     function saveAppointment() {
         if (!validateAppointmentForm()) return;
 
@@ -546,20 +538,17 @@
         }
 
         const data = {
-            Id:              id,
-            DoctorId:        document.getElementById('doctorId').value,
-            PatientId:       document.getElementById('patientId').value,
-            AppointmentDate: document.getElementById('appointmentDate').value,
-            AppointmentTime: document.getElementById('appointmentTime').value,
-            Status:          document.getElementById('status').value,
-            Notes:           document.getElementById('notes').value,
+            Id:       id,
+            DoctorId: document.getElementById('doctorId').value,
+            Date:     document.getElementById('appointmentDate').value,
+            Time:     document.getElementById('appointmentTime').value,
             __RequestVerificationToken: token
         };
 
         $.post(url, data)
             .done(function() {
                 appointmentModal.hide();
-                refreshAll(); // Ново/изменето значи и статистиката се менува
+                refreshAll();
             })
             .fail(function(xhr) {
                 const response = xhr.responseJSON;
@@ -573,7 +562,7 @@
         errDiv.classList.remove('d-none');
     }
 
-    // ── Бришење термин ────────────────────────────────────────────────
+    // ── Бришење термин/слот ────────────────────────────────────────────
     function deleteAppointment(id) {
         document.getElementById('deleteAppointmentId').value = id;
         deleteModal.show();
@@ -586,47 +575,56 @@
         $.post('/Appointments/Delete', { id: id, __RequestVerificationToken: token })
             .done(function() {
                 deleteModal.hide();
-                refreshAll(); // Бришење влијае на статистиката
+                refreshAll();
             })
             .fail(function() {
                 alert('Грешка при бришење.');
             });
     }
 
-    // ── Почеток на преглед ────────────────────────────────────
-    function startExam(id) {
-        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    // ── Означи термин како завршен ────────────────────────────────────
+    function openCompleteModal(id) {
+        document.getElementById('completeAppointmentId').value = id;
+        document.getElementById('completeNotes').value = '';
+        completeModal.show();
+    }
 
-        $.post('/Appointments/StartExam', { id: id, __RequestVerificationToken: token })
+    function confirmComplete() {
+        const id    = document.getElementById('completeAppointmentId').value;
+        const notes = document.getElementById('completeNotes').value;
+        const token = document.querySelector('#completeForm input[name="__RequestVerificationToken"]').value;
+
+        $.post('/Appointments/Complete', { id: id, notes: notes, __RequestVerificationToken: token })
             .done(function() {
-                refreshAll(); // Статусот се менува - статистиката треба да се освежи
+                completeModal.hide();
+                refreshAll();
             })
             .fail(function(xhr) {
                 const response = xhr.responseJSON;
-                alert(response?.errors?.join('\n') || 'Грешка при започнување на прегледот.');
+                alert(response?.errors?.join('\n') || 'Грешка при завршување на терминот.');
             });
     }
 
-    // ── Завршување на преглед ─────────────────────────────────
-    function openFinishModal(id) {
-        document.getElementById('finishAppointmentId').value = id;
-        document.getElementById('finishNotes').value = '';
-        finishModal.show();
+    // ── Откажи резервиран термин (испраќа е-пошта до пациентот) ────────
+    function openCancelModal(id) {
+        document.getElementById('cancelAppointmentId').value = id;
+        document.getElementById('cancelReason').value = '';
+        cancelModal.show();
     }
 
-    function confirmFinishExam() {
-        const id    = document.getElementById('finishAppointmentId').value;
-        const notes = document.getElementById('finishNotes').value;
-        const token = document.querySelector('#finishForm input[name="__RequestVerificationToken"]').value;
+    function confirmCancel() {
+        const id     = document.getElementById('cancelAppointmentId').value;
+        const reason = document.getElementById('cancelReason').value;
+        const token  = document.querySelector('#cancelForm input[name="__RequestVerificationToken"]').value;
 
-        $.post('/Appointments/FinishExam', { id: id, notes: notes, __RequestVerificationToken: token })
+        $.post('/Appointments/Cancel', { id: id, reason: reason, __RequestVerificationToken: token })
             .done(function() {
-                finishModal.hide();
-                refreshAll(); // Статусот се менува - статистиката треба да се освежи
+                cancelModal.hide();
+                refreshAll();
             })
             .fail(function(xhr) {
                 const response = xhr.responseJSON;
-                alert(response?.errors?.join('\n') || 'Грешка при завршување на прегледот.');
+                alert(response?.errors?.join('\n') || 'Грешка при откажување на терминот.');
             });
     }
 </script>

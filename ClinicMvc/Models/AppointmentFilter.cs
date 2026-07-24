@@ -58,13 +58,16 @@ public class AppointmentStatistics
     /// <summary>Вкупен број на термини кои одговараат на филтрите</summary>
     public int Total { get; set; }
 
-    /// <summary>Број на термини во статус "Zakazan"</summary>
-    public int Scheduled { get; set; }
+    /// <summary>Број на слободни термини (Status = Free)</summary>
+    public int Free { get; set; }
 
-    /// <summary>Број на термини во статус "Zavrsen"</summary>
+    /// <summary>Број на резервирани термини (Status = Booked)</summary>
+    public int Booked { get; set; }
+
+    /// <summary>Број на термини во статус "Completed"</summary>
     public int Completed { get; set; }
 
-    /// <summary>Број на термини во статус "Otkazen"</summary>
+    /// <summary>Број на термини во статус "Cancelled"</summary>
     public int Cancelled { get; set; }
 }
 

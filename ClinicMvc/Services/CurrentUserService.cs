@@ -31,6 +31,16 @@ public class CurrentUserService : ICurrentUserService
         }
     }
 
+    public int? PatientId
+    {
+        get
+        {
+            var value = User?.FindFirst("PatientId")?.Value;
+            return int.TryParse(value, out var id) ? id : null;
+        }
+    }
+
     public bool IsAdministrator => Role == "Administrator";
     public bool IsDoctor        => Role == "Doctor";
+    public bool IsPatient       => Role == "Patient";
 }

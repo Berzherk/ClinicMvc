@@ -1,0 +1,116 @@
+@* Пациентски Dashboard - идни термини + историја *@
+@model PatientDashboardViewModel
+@{
+    ViewData["Title"] = "Мој профил";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Мои термини</h2>
+    <a asp-action="AvailableSlots" class="btn btn-primary">
+        <i class="bi bi-calendar-plus"></i> Закажи нов термин
+    </a>
+</div>
+
+<div id="alertBox"></div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">Идни термини</div>
+    <div class="card-body">
+        @if (!Model.UpcomingAppointments.Any())
+        {
+            <p class="text-muted mb-0">Немате закажани идни термини.</p>
+        }
+        else
+        {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Датум</th><th>Време</th><th>Лекар</th><th>Специјалност</th><th>Статус</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.UpcomingAppointments)
+                    {
+                        <tr id="appt-row-@a.Id">
+                            <td>@a.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                            <td>@a.AppointmentTime.ToString(@"hh\:mm")</td>
+                            <td>@a.DoctorName</td>
+                            <td>@a.DoctorSpecialty</td>
+                            <td><span class="badge bg-info text-dark">@a.Status</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger btn-cancel" data-id="@a.Id">
+                                    Откажи
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">Историја на термини</div>
+    <div class="card-body">
+        @if (!Model.AppointmentHistory.Any())
+        {
+            <p class="text-muted mb-0">Нема историски термини.</p>
+        }
+        else
+        {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr><th>Датум</th><th>Време</th><th>Лекар</th><th>Специјалност</th><th>Статус</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.AppointmentHistory)
+                    {
+                        <tr>
+                            <td>@a.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                            <td>@a.AppointmentTime.ToString(@"hh\:mm")</td>
+                            <td>@a.DoctorName</td>
+                            <td>@a.DoctorSpecialty</td>
+                            <td>
+                                @{
+                                    var badgeClass = a.Status == "Completed" ? "bg-success" : "bg-secondary";
+                                }
+                                <span class="badge @badgeClass">@a.Status</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.btn-cancel').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                if (!confirm('Дали сте сигурни дека сакате да го откажете терминот?')) return;
+
+                const id = this.dataset.id;
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                const response = await fetch('@Url.Action("Cancel")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                    body: 'id=' + encodeURIComponent(id)
+                });
+
+                const alertBox = document.getElementById('alertBox');
+                if (response.ok) {
+                    document.getElementById('appt-row-' + id).remove();
+                    alertBox.innerHTML = '<div class="alert alert-success">Терминот е успешно откажан.</div>';
+                } else {
+                    const data = await response.json().catch(() => null);
+                    const msg = data?.errors?.join(' ') || 'Настана грешка при откажување.';
+                    alertBox.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
+                }
+            });
+        });
+    </script>
+    <form style="display:none">@Html.AntiForgeryToken()</form>
+}

@@ -93,6 +93,13 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Е-пошта <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="doctorEmail" name="Email" autocomplete="off" />
+                            <div class="invalid-feedback">Внесете валидна е-пошта адреса.</div>
+                            <div class="form-text">На оваа адреса ќе биде испратен линк за потврда пред докторот да може да се најави.</div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Лозинка <span class="text-danger">*</span></label>
                             <input type="password" class="form-control" id="password" name="Password" autocomplete="new-password" />
                             <div class="invalid-feedback">Лозинката мора да има најмалку 6 карактери.</div>
@@ -146,6 +153,7 @@
         document.getElementById('phone').value      = '';
         document.getElementById('isActive').checked = true;
         document.getElementById('username').value   = '';
+        document.getElementById('doctorEmail').value = '';
         document.getElementById('password').value   = '';
 
         // Кориснички акредитиви се внесуваат САМО при креирање нов доктор
@@ -201,6 +209,10 @@
             if (username.value.trim().length < 3) { username.classList.add('is-invalid'); isValid = false; }
             else { username.classList.remove('is-invalid'); username.classList.add('is-valid'); }
 
+            const doctorEmail = document.getElementById('doctorEmail');
+            if (!/^\S+@@\S+\.\S+$/.test(doctorEmail.value.trim())) { doctorEmail.classList.add('is-invalid'); isValid = false; }
+            else { doctorEmail.classList.remove('is-invalid'); doctorEmail.classList.add('is-valid'); }
+
             const password = document.getElementById('password');
             if (password.value.length < 6) { password.classList.add('is-invalid'); isValid = false; }
             else { password.classList.remove('is-invalid'); password.classList.add('is-valid'); }
@@ -211,7 +223,7 @@
 
     function clearValidation() {
         document.getElementById('doctorFormErrors').classList.add('d-none');
-        ['firstName', 'lastName', 'specialty', 'phone', 'username', 'password'].forEach(id => {
+        ['firstName', 'lastName', 'specialty', 'phone', 'username', 'doctorEmail', 'password'].forEach(id => {
             document.getElementById(id).classList.remove('is-invalid', 'is-valid');
         });
     }
@@ -237,6 +249,7 @@
         // DoctorCreateViewModel на серверот ги очекува само тогаш (Edit прима обичен Doctor модел)
         if (isCreating) {
             data.Username = document.getElementById('username').value.trim();
+            data.Email    = document.getElementById('doctorEmail').value.trim();
             data.Password = document.getElementById('password').value;
         }
 

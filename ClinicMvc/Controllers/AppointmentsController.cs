@@ -8,9 +8,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace ClinicMvc.Controllers;
 
 /// <summary>
-/// Контролер за управување со термини.
-/// Ги повикува Services слојот за бизнис логика (валидации, конфликти, извоз) -
-/// самиот контролер само ги обликува HTTP одговорите.
+/// Контролер за управување со термини / термински слотови (Administrator, Doctor).
+/// Ги повикува Services слојот за бизнис логика - самиот контролер само ги обликува
+/// HTTP одговорите.
+///
+/// НОВ МОДЕЛ НА ЗАКАЖУВАЊЕ: администраторот (или докторот) креира однапред слободни
+/// слотови (Create -> CreateSlot). Пациентите ги резервираат преку PatientPortal.
+/// Овде докторот/администраторот може да ги менува/бришe слотовите (додека се Free),
+/// да откажe резервиран термин (Cancel), или да го означи завршен (Complete).
 /// </summary>
 [Authorize(Roles = "Administrator,Doctor")]
 public class AppointmentsController : Controller
@@ -21,9 +26,6 @@ public class AppointmentsController : Controller
     private readonly IAppointmentService    _appointmentService;
     private readonly IExportService         _exportService;
     private readonly ICurrentUserService    _currentUser;
-
-    private static readonly string[] StatusOptions =
-        { "Zakazan", "Vo tek", "Zavrsen", "Otkazen" };
 
     public AppointmentsController(
         IAppointmentRepository appointmentRepository,
@@ -58,10 +60,8 @@ public class AppointmentsController : Controller
 
     // Забелешка: LoadTable/LoadPagination/LoadStatistics НЕ ја ограничуваат листата
     // само на сопствениот доктор - секој логиран доктор може да ги гледа и филтрира
-    // термините на сите доктори (потребно за филтерот "Ime на лекар" да работи correctно).
-    // Ограничувањето по сопственик останува само на акциите кои МЕНУВААТ податоци
-    // (Create/Edit/StartExam/FinishExam) - таму доктор сепак не смее да допира термини
-    // на друг доктор.
+    // термините на сите доктори (потребно за филтерот "Ime на лекар" да работи correctno).
+    // Ограничувањето по сопственик останува само на акциите кои МЕНУВААТ податоци.
 
     [HttpGet]
     public async Task<IActionResult> LoadTable(AppointmentFilter filter)
@@ -102,7 +102,7 @@ public class AppointmentsController : Controller
         if (appointment == null) return NotFound();
 
         // Прегледот на детали е дозволен за сите - ограничувањето по сопственик
-        // е само за менување (Edit/Delete/StartExam/FinishExam подолу).
+        // е само за менување (Create/Edit/Delete/Cancel/Complete подолу).
         return Json(appointment);
     }
 
@@ -110,7 +110,6 @@ public class AppointmentsController : Controller
     public async Task<IActionResult> GetDropdowns()
     {
         var allDoctors = await _doctorRepository.GetAllAsync();
-        var patients   = await _patientRepository.GetAllAsync();
         var activeDoctors = allDoctors.Where(d => d.IsActive);
 
         if (_currentUser.IsDoctor && _currentUser.DoctorId.HasValue)
@@ -121,33 +120,41 @@ public class AppointmentsController : Controller
         return Json(new
         {
             doctors  = activeDoctors.Select(d => new { d.Id, name = d.FullName }),
-            patients = patients.Select(p => new { p.Id, name = $"{p.FirstName} {p.LastName}" }),
-            statuses = StatusOptions
+            statuses = AppointmentStatus.All
         });
     }
 
+    /// <summary>
+    /// POST: /Appointments/Create - креира нов слободен термински слот
+    /// (само Doctor/Specialty/Date/Time - НИКОГАШ пациент или статус рачно).
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Appointment appointment)
+    public async Task<IActionResult> Create(CreateSlotViewModel model)
     {
-        if (_currentUser.IsDoctor && appointment.DoctorId != _currentUser.DoctorId)
+        if (_currentUser.IsDoctor && model.DoctorId != _currentUser.DoctorId)
             return Forbid();
 
-        var (success, _, errors) = await _appointmentService.CreateAppointmentAsync(appointment, _currentUser.Username);
+        var (success, _, errors) = await _appointmentService.CreateSlotAsync(model, _currentUser.Username);
         if (!success)
             return BadRequest(new { success = false, errors });
 
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// POST: /Appointments/Edit - ги менува основните податоци на еден слот
+    /// (дозволено само додека статусот е Free - откако е резервиран, се менува
+    /// само преку Cancel/Complete).
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Appointment appointment)
+    public async Task<IActionResult> Edit(int id, CreateSlotViewModel model)
     {
-        if (_currentUser.IsDoctor && appointment.DoctorId != _currentUser.DoctorId)
+        if (_currentUser.IsDoctor && model.DoctorId != _currentUser.DoctorId)
             return Forbid();
 
-        var (success, errors) = await _appointmentService.UpdateAppointmentAsync(appointment, _currentUser.Username);
+        var (success, errors) = await _appointmentService.UpdateSlotAsync(id, model, _currentUser.Username);
         if (!success)
             return BadRequest(new { success = false, errors });
 
@@ -163,9 +170,13 @@ public class AppointmentsController : Controller
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// POST: /Appointments/Cancel - Administrator може да откаже секој термин;
+    /// Doctor само свои. Ако терминот бил резервиран, пациентот се известува по е-пошта.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> StartExam(int id)
+    public async Task<IActionResult> Cancel(int id, string? reason)
     {
         var appointment = await _appointmentRepository.GetByIdAsync(id);
         if (appointment == null)
@@ -174,16 +185,18 @@ public class AppointmentsController : Controller
         if (_currentUser.IsDoctor && appointment.DoctorId != _currentUser.DoctorId)
             return Forbid();
 
-        var (success, errors) = await _appointmentService.StartExamAsync(id, _currentUser.Username);
+        var role = _currentUser.IsDoctor ? "Doctor" : "Administrator";
+        var (success, errors) = await _appointmentService.CancelAppointmentAsync(id, _currentUser.Username, role, reason);
         if (!success)
             return BadRequest(new { success = false, errors });
 
         return Ok(new { success = true });
     }
 
+    /// <summary>POST: /Appointments/Complete - докторот го означува резервиран термин како завршен.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> FinishExam(int id, string? notes)
+    public async Task<IActionResult> Complete(int id, string? notes)
     {
         var appointment = await _appointmentRepository.GetByIdAsync(id);
         if (appointment == null)
@@ -192,7 +205,7 @@ public class AppointmentsController : Controller
         if (_currentUser.IsDoctor && appointment.DoctorId != _currentUser.DoctorId)
             return Forbid();
 
-        var (success, errors) = await _appointmentService.FinishExamAsync(id, notes, _currentUser.Username);
+        var (success, errors) = await _appointmentService.CompleteAppointmentAsync(id, notes, _currentUser.Username);
         if (!success)
             return BadRequest(new { success = false, errors });
 

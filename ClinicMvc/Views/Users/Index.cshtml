@@ -11,7 +11,9 @@
         <tr>
             <th>Корисничко ime</th>
             <th>Улога</th>
-            <th>Поврзан доктор</th>
+            <th>Е-пошта</th>
+            <th>Потврдена</th>
+            <th>Поврзан доктор/пациент</th>
             <th>Креиран на</th>
             <th>Акции</th>
         </tr>
@@ -22,7 +24,18 @@
             <tr id="user-row-@u.Id">
                 <td>@u.Username</td>
                 <td><span class="badge bg-secondary">@u.Role</span></td>
-                <td>@(u.Doctor != null ? u.Doctor.FullName : "-")</td>
+                <td>@u.Email</td>
+                <td>
+                    @if (u.EmailConfirmed)
+                    {
+                        <span class="badge bg-success">Да</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Не</span>
+                    }
+                </td>
+                <td>@(u.Doctor != null ? u.Doctor.FullName : (u.Patient != null ? u.Patient.FullName : "-"))</td>
                 <td>@u.CreatedOn.ToString("dd.MM.yyyy")</td>
                 <td>
                     <button class="btn btn-sm btn-warning" onclick="openResetModal(@u.Id, '@u.Username')">Ресетирај лозинка</button>

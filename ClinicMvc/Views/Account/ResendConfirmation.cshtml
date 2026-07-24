@@ -1,0 +1,45 @@
+@* Форма за повторно испраќање линк за потврда на е-пошта *@
+@model ResendConfirmationViewModel
+@{
+    ViewData["Title"] = "Испрати повторно линк за потврда";
+    Layout = "_LoginLayout";
+}
+
+<div class="d-flex justify-content-center align-items-center py-5">
+    <div class="card shadow" style="width: 440px;">
+        <div class="card-body p-4">
+            <h4 class="text-center mb-3">Испрати повторно линк за потврда</h4>
+            <p class="text-muted small text-center mb-4">
+                Внесете ја е-поштата со која се регистриравте - ако сметката постои и
+                сè уште не е потврдена, ќе испратиме нов линк.
+            </p>
+
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success">@ViewBag.Message</div>
+            }
+
+            <form asp-action="ResendConfirmation" method="post">
+                @Html.AntiForgeryToken()
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" type="email" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Испрати повторно</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a asp-action="Login" class="small">Назад кон најава</a>
+            </div>
+        </div>
+    </div>
+</div>

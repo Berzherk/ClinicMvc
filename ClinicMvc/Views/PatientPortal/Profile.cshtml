@@ -1,0 +1,51 @@
+@* Пациентот го уредува само сопствениот профил *@
+@model PatientProfileViewModel
+@{
+    ViewData["Title"] = "Мој профил";
+}
+
+<h2 class="mb-4">Мој профил</h2>
+
+@if (ViewBag.Saved == true)
+{
+    <div class="alert alert-success">Профилот е успешно зачуван.</div>
+}
+
+<div class="card" style="max-width: 560px;">
+    <div class="card-body">
+        <form asp-action="Profile" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Embg" class="form-label"></label>
+                <input asp-for="Embg" class="form-control" maxlength="13" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Зачувај</button>
+        </form>
+    </div>
+</div>

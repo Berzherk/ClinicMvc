@@ -11,8 +11,12 @@
             <span class="badge bg-primary rounded-pill">@Model.Total</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            Закажани
-            <span class="badge bg-info text-dark rounded-pill">@Model.Scheduled</span>
+            Слободни
+            <span class="badge bg-light text-dark border rounded-pill">@Model.Free</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Резервирани
+            <span class="badge bg-info text-dark rounded-pill">@Model.Booked</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
             Завршени

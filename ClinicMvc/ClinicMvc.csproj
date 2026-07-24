@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ClinicMvc</RootNamespace>
+    <UserSecretsId>5ce8c612-faa6-46d4-a721-97b2a62e4020</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

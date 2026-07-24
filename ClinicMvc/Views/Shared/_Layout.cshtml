@@ -27,6 +27,12 @@
                 <a class="nav-link" asp-controller="Appointments" asp-action="Index">Мои термини</a>
                 <a class="nav-link" asp-controller="Patients" asp-action="Index">Пациенти</a>
             }
+            @if (User.IsInRole("Patient"))
+            {
+                <a class="nav-link" asp-controller="PatientPortal" asp-action="Index">Мои термини</a>
+                <a class="nav-link" asp-controller="PatientPortal" asp-action="AvailableSlots">Закажи термин</a>
+                <a class="nav-link" asp-controller="PatientPortal" asp-action="Profile">Мој профил</a>
+            }
         </div>
 
         @* Прикажи "Најави се" или "Одјава" зависно од состојбата *@

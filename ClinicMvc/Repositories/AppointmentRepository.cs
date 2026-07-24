@@ -6,17 +6,30 @@ using Dapper;
 namespace ClinicMvc.Repositories;
 
 /// <summary>
-/// Репозиториум за термини. Поддржува Soft Delete, audit колони и рестрикција по доктор
-/// (за докторска улога која смее да гледа само свои термини).
+/// Репозиториум за термини / термински слотови. Поддржува Soft Delete, audit колони и
+/// рестрикција по доктор (за докторска улога која смее да гледа само свои термини).
+///
+/// НАПОМЕНА: колоната во базата се вика PARIENTID (историски typo), но полето во
+/// C# моделот е PatientId - алијасирано преку "AS" во сите SELECT изрази подолу.
+/// Колоната сега дозволува NULL бидејќи слободните слотови немаат доделен пациент.
 /// </summary>
 public class AppointmentRepository : IAppointmentRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
 
+    // LEFT JOIN на PATIENTS бидејќи слободните слотови (PARIENTID = NULL) немаат пациент.
     private const string FromJoinSql = @"
         FROM APPOINTMENTS a
-        JOIN DOCTORS  d ON d.ID = a.DOCTORID
-        JOIN PATIENTS p ON p.ID = a.PARIENTID";
+        JOIN      DOCTORS  d ON d.ID = a.DOCTORID
+        LEFT JOIN PATIENTS p ON p.ID = a.PARIENTID";
+
+    private const string SelectColumns = @"
+        a.ID, a.DOCTORID, a.PARIENTID AS PATIENTID,
+        a.APPOINTMENTDATE, a.APPOINTMENTTIME, a.STATUS, a.NOTES,
+        (d.FIRSTNAME || ' ' || d.LASTNAME) AS DOCTORNAME,
+        (p.FIRSTNAME || ' ' || p.LASTNAME) AS PATIENTNAME,
+        p.EMAIL AS PATIENTEMAIL,
+        d.SPECIALTY AS DOCTORSPECIALTY";
 
     public AppointmentRepository(IDbConnectionFactory connectionFactory)
     {
@@ -100,11 +113,7 @@ public class AppointmentRepository : IAppointmentRepository
 
         var sql = $@"
             SELECT FIRST @PageSize SKIP @Skip
-                a.ID, a.DOCTORID, a.PARIENTID AS PATIENTID,
-                a.APPOINTMENTDATE, a.APPOINTMENTTIME, a.STATUS, a.NOTES,
-                (d.FIRSTNAME || ' ' || d.LASTNAME) AS DOCTORNAME,
-                (p.FIRSTNAME || ' ' || p.LASTNAME) AS PATIENTNAME,
-                d.SPECIALTY AS DOCTORSPECIALTY
+                {SelectColumns}
             {FromJoinSql}
             {where}
             ORDER BY {orderColumn} {direction}";
@@ -128,9 +137,10 @@ public class AppointmentRepository : IAppointmentRepository
         var sql = $@"
             SELECT
                 COUNT(*) AS TOTAL,
-                COALESCE(SUM(CASE WHEN a.STATUS = 'Zakazan' THEN 1 ELSE 0 END), 0) AS SCHEDULED,
-                COALESCE(SUM(CASE WHEN a.STATUS = 'Zavrsen' THEN 1 ELSE 0 END), 0) AS COMPLETED,
-                COALESCE(SUM(CASE WHEN a.STATUS = 'Otkazen' THEN 1 ELSE 0 END), 0) AS CANCELLED
+                COALESCE(SUM(CASE WHEN a.STATUS = 'Free'      THEN 1 ELSE 0 END), 0) AS FREE,
+                COALESCE(SUM(CASE WHEN a.STATUS = 'Booked'    THEN 1 ELSE 0 END), 0) AS BOOKED,
+                COALESCE(SUM(CASE WHEN a.STATUS = 'Completed' THEN 1 ELSE 0 END), 0) AS COMPLETED,
+                COALESCE(SUM(CASE WHEN a.STATUS = 'Cancelled' THEN 1 ELSE 0 END), 0) AS CANCELLED
             {FromJoinSql}
             {where}";
 
@@ -141,46 +151,45 @@ public class AppointmentRepository : IAppointmentRepository
     public async Task<Appointment?> GetByIdAsync(int id)
     {
         using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"SELECT ID, DOCTORID, PARIENTID AS PATIENTID,
-                                     APPOINTMENTDATE, APPOINTMENTTIME, STATUS, NOTES
-                              FROM APPOINTMENTS WHERE ID = @Id";
+        var sql = $@"SELECT {SelectColumns} {FromJoinSql} WHERE a.ID = @Id";
         return await connection.QueryFirstOrDefaultAsync<Appointment>(sql, new { Id = id });
     }
 
-    public async Task<int> CreateAsync(Appointment appointment, string createdBy)
+    /// <summary>Креира нов слободен термински слот - PARIENTID = NULL, STATUS = 'Free'.</summary>
+    public async Task<int> CreateSlotAsync(int doctorId, DateTime date, TimeSpan time, string createdBy)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = @"INSERT INTO APPOINTMENTS
                                 (DOCTORID, PARIENTID, APPOINTMENTDATE, APPOINTMENTTIME, STATUS, NOTES,
                                  ISDELETED, CREATEDON, CREATEDBY)
                               VALUES
-                                (@DoctorId, @PatientId, @AppointmentDate, @AppointmentTime, @Status, @Notes,
+                                (@DoctorId, NULL, @AppointmentDate, @AppointmentTime, @Status, NULL,
                                  FALSE, CURRENT_TIMESTAMP, @CreatedBy)
                               RETURNING ID";
         return await connection.ExecuteScalarAsync<int>(sql, new
         {
-            appointment.DoctorId, appointment.PatientId, appointment.AppointmentDate,
-            appointment.AppointmentTime, appointment.Status, appointment.Notes, CreatedBy = createdBy
+            DoctorId = doctorId,
+            AppointmentDate = date.Date,
+            AppointmentTime = time,
+            Status = AppointmentStatus.Free,
+            CreatedBy = createdBy
         });
     }
 
-    public async Task UpdateAsync(Appointment appointment, string modifiedBy)
+    public async Task UpdateSlotAsync(int id, int doctorId, DateTime date, TimeSpan time, string modifiedBy)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = @"UPDATE APPOINTMENTS SET
                                 DOCTORID        = @DoctorId,
-                                PARIENTID       = @PatientId,
                                 APPOINTMENTDATE = @AppointmentDate,
                                 APPOINTMENTTIME = @AppointmentTime,
-                                STATUS          = @Status,
-                                NOTES           = @Notes,
                                 MODIFIEDON      = CURRENT_TIMESTAMP,
                                 MODIFIEDBY      = @ModifiedBy
-                              WHERE ID = @Id";
+                              WHERE ID = @Id AND STATUS = @FreeStatus";
         await connection.ExecuteAsync(sql, new
         {
-            appointment.Id, appointment.DoctorId, appointment.PatientId, appointment.AppointmentDate,
-            appointment.AppointmentTime, appointment.Status, appointment.Notes, ModifiedBy = modifiedBy
+            Id = id, DoctorId = doctorId, AppointmentDate = date.Date, AppointmentTime = time,
+            ModifiedBy = modifiedBy, FreeStatus = AppointmentStatus.Free
         });
     }
 
@@ -197,39 +206,30 @@ public class AppointmentRepository : IAppointmentRepository
     }
 
     /// <summary>
-    /// Проверува дали новиот/изменетиот термин паѓа премногу близу до постоечки термин
-    /// за ИСТИОТ доктор на ИСТИОТ датум. Бара минимум 15 минути слободно време
-    /// и пред и по секој термин (се дозволува слободен избор на време, не фиксни слотови).
-    /// excludeId - ID на терминот кој се игнорира (при измена на постоечки термин).
+    /// Атомска резервација - условот "STATUS = Free" е дел од самиот UPDATE, не претходна проверка,
+    /// за да се избегне "race condition" кога двајца пациенти кликнуваат "Резервирај" во ист момент.
+    /// Ако 0 редови се засегнати, слотот веќе бил зафатен - враќа false.
     /// </summary>
-    public async Task<bool> HasConflictAsync(int doctorId, DateTime date, TimeSpan time, int excludeId = 0)
+    public async Task<bool> BookSlotAsync(int id, int patientId, string modifiedBy)
     {
         using var connection = _connectionFactory.CreateConnection();
+        const string sql = @"UPDATE APPOINTMENTS SET
+                                PARIENTID  = @PatientId,
+                                STATUS     = @BookedStatus,
+                                MODIFIEDON = CURRENT_TIMESTAMP,
+                                MODIFIEDBY = @ModifiedBy
+                              WHERE ID = @Id AND STATUS = @FreeStatus AND ISDELETED = FALSE";
 
-        // Ги земаме СИТЕ времиња на терминиte на овој доктор за тој датум
-        // (пресметката на минималната разлика се прави во C#, не во SQL,
-        // бидејќи Firebird нема удобна ABS/TIME-diff функција преку Dapper параметри)
-        const string sql = @"SELECT APPOINTMENTTIME FROM APPOINTMENTS
-                              WHERE DOCTORID        = @DoctorId
-                                AND APPOINTMENTDATE = @Date
-                                AND ID             <> @ExcludeId
-                                AND ISDELETED       = FALSE";
-        var existingTimes = await connection.QueryAsync<TimeSpan>(sql,
-            new { DoctorId = doctorId, Date = date.Date, ExcludeId = excludeId });
-
-        const int bufferMinutes = 15;
-
-        // Ако разликата до кој било постоечки термин е 15 минути или помалку - конфликт
-        foreach (var existingTime in existingTimes)
+        var rowsAffected = await connection.ExecuteAsync(sql, new
         {
-            var diffMinutes = Math.Abs((time - existingTime).TotalMinutes);
-            if (diffMinutes <= bufferMinutes)
-            {
-                return true;
-            }
-        }
+            Id = id,
+            PatientId = patientId,
+            ModifiedBy = modifiedBy,
+            BookedStatus = AppointmentStatus.Booked,
+            FreeStatus = AppointmentStatus.Free
+        });
 
-        return false;
+        return rowsAffected > 0;
     }
 
     public async Task UpdateStatusAsync(int id, string newStatus, string modifiedBy, string? notes = null)
@@ -244,15 +244,76 @@ public class AppointmentRepository : IAppointmentRepository
         await connection.ExecuteAsync(sql, new { Id = id, Status = newStatus, Notes = notes, ModifiedBy = modifiedBy });
     }
 
-    public async Task<IEnumerable<TimeSpan>> GetBookedTimesAsync(int doctorId, DateTime date)
+    public async Task<IEnumerable<FreeSlot>> SearchFreeSlotsAsync(FreeSlotsFilter filter)
     {
         using var connection = _connectionFactory.CreateConnection();
-        const string sql = @"SELECT APPOINTMENTTIME
-                              FROM APPOINTMENTS
-                              WHERE DOCTORID        = @DoctorId
-                                AND APPOINTMENTDATE = @Date
-                                AND STATUS          <> 'Otkazen'
-                                AND ISDELETED        = FALSE";
-        return await connection.QueryAsync<TimeSpan>(sql, new { DoctorId = doctorId, Date = date.Date });
+        var sb = new StringBuilder(@"
+            SELECT a.ID, a.DOCTORID,
+                   (d.FIRSTNAME || ' ' || d.LASTNAME) AS DOCTORNAME,
+                   d.SPECIALTY AS DOCTORSPECIALTY,
+                   a.APPOINTMENTDATE AS ""DATE"",
+                   a.APPOINTMENTTIME AS ""TIME""
+            FROM APPOINTMENTS a
+            JOIN DOCTORS d ON d.ID = a.DOCTORID
+            WHERE a.ISDELETED = FALSE AND a.STATUS = @FreeStatus AND d.ISACTIVE = TRUE");
+        var p = new DynamicParameters();
+        p.Add("FreeStatus", AppointmentStatus.Free);
+
+        if (filter.DoctorId.HasValue)
+        {
+            sb.Append(" AND a.DOCTORID = @DoctorId");
+            p.Add("DoctorId", filter.DoctorId.Value);
+        }
+        if (!string.IsNullOrWhiteSpace(filter.Specialty))
+        {
+            sb.Append(" AND d.SPECIALTY = @Specialty");
+            p.Add("Specialty", filter.Specialty);
+        }
+        if (filter.Date.HasValue)
+        {
+            sb.Append(" AND a.APPOINTMENTDATE = @Date");
+            p.Add("Date", filter.Date.Value.Date);
+        }
+        else
+        {
+            // Без конкретен датум - сепак не прикажувај минати слотови
+            sb.Append(" AND a.APPOINTMENTDATE >= @Today");
+            p.Add("Today", DateTime.Today);
+        }
+
+        sb.Append(" ORDER BY a.APPOINTMENTDATE, a.APPOINTMENTTIME");
+
+        return await connection.QueryAsync<FreeSlot>(sb.ToString(), p);
+    }
+
+    public async Task<IEnumerable<Appointment>> GetPatientAppointmentsAsync(int patientId, bool upcomingOnly)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = $@"
+            SELECT {SelectColumns}
+            {FromJoinSql}
+            WHERE a.ISDELETED = FALSE AND a.PARIENTID = @PatientId
+              AND {(upcomingOnly ? "a.STATUS = 'Booked'" : "a.STATUS IN ('Completed', 'Cancelled')")}
+            ORDER BY a.APPOINTMENTDATE {(upcomingOnly ? "ASC" : "DESC")}, a.APPOINTMENTTIME ASC";
+
+        return await connection.QueryAsync<Appointment>(sql, new { PatientId = patientId });
+    }
+
+    public async Task<bool> ExistsAtSlotAsync(int doctorId, DateTime date, TimeSpan time, int excludeId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = @"SELECT COUNT(*) FROM APPOINTMENTS
+                              WHERE ISDELETED = FALSE AND DOCTORID = @DoctorId
+                                AND APPOINTMENTDATE = @Date AND APPOINTMENTTIME = @Time
+                                AND ID <> @ExcludeId";
+        var count = await connection.ExecuteScalarAsync<int>(sql, new
+        {
+            DoctorId = doctorId,
+            Date = date.Date,
+            Time = time,
+            ExcludeId = excludeId
+        });
+        return count > 0;
     }
 }

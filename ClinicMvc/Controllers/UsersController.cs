@@ -15,6 +15,7 @@ public class UsersController : Controller
 {
     private readonly IUserRepository     _userRepository;
     private readonly IDoctorRepository   _doctorRepository;
+    private readonly IPatientRepository  _patientRepository;
     private readonly IPasswordHasher     _passwordHasher;
     private readonly IAuditLogRepository _auditLogRepository;
     private readonly ICurrentUserService _currentUser;
@@ -22,12 +23,14 @@ public class UsersController : Controller
     public UsersController(
         IUserRepository userRepository,
         IDoctorRepository doctorRepository,
+        IPatientRepository patientRepository,
         IPasswordHasher passwordHasher,
         IAuditLogRepository auditLogRepository,
         ICurrentUserService currentUser)
     {
         _userRepository      = userRepository;
         _doctorRepository    = doctorRepository;
+        _patientRepository   = patientRepository;
         _passwordHasher      = passwordHasher;
         _auditLogRepository  = auditLogRepository;
         _currentUser         = currentUser;
@@ -44,13 +47,18 @@ public class UsersController : Controller
         var totalCount = await _userRepository.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
 
-        // Ги полниме поврзаните доктори само за докторите прикажани на тековната страница
-        var allDoctors = await _doctorRepository.GetAllAsync();
+        // Ги полниме поврзаните доктори/пациенти само за записите прикажани на тековната страница
+        var allDoctors  = await _doctorRepository.GetAllAsync();
+        var allPatients = await _patientRepository.GetAllAsync();
         foreach (var user in users)
         {
             if (user.DoctorId.HasValue)
             {
                 user.Doctor = allDoctors.FirstOrDefault(d => d.Id == user.DoctorId.Value);
+            }
+            if (user.PatientId.HasValue)
+            {
+                user.Patient = allPatients.FirstOrDefault(p => p.Id == user.PatientId.Value);
             }
         }
 

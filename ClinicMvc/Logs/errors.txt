@@ -490,3 +490,258 @@ I/O error during "CreateFile (open)" operation for file "C:\USERS\SLAVE\DESKTOP\
 Error while trying to open file
 ========================================================
 
+========================================================
+Дата и време: 2026-07-24 08:44:01
+HTTP метод:   POST
+URL:          /Account/Register
+Контролер:    Account
+Акција:       Register
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -206
+Column unknown
+PATIENTID
+At line 1, column 52
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryRowAsync[T](IDbConnection cnn, Row row, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 489
+   at ClinicMvc.Repositories.UserRepository.GetByUsernameAsync(String username) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\UserRepository.cs:line 32
+   at ClinicMvc.Services.PatientAccountService.RegisterAsync(RegisterViewModel model) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Services\PatientAccountService.cs:line 37
+   at ClinicMvc.Controllers.AccountController.Register(RegisterViewModel model) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\AccountController.cs:line 128
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -206
+Column unknown
+PATIENTID
+At line 1, column 52
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 08:44:09
+HTTP метод:   POST
+URL:          /Account/Login?returnUrl=%2F
+Контролер:    Account
+Акција:       Login
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -206
+Column unknown
+PATIENTID
+At line 1, column 52
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryRowAsync[T](IDbConnection cnn, Row row, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 489
+   at ClinicMvc.Repositories.UserRepository.GetByUsernameAsync(String username) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\UserRepository.cs:line 32
+   at ClinicMvc.Controllers.AccountController.Login(LoginViewModel model, String returnUrl) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\AccountController.cs:line 56
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -206
+Column unknown
+PATIENTID
+At line 1, column 52
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 09:10:05
+HTTP метод:   GET
+URL:          /FreeSlots/LoadSlots?DoctorId=&Specialty=&Date=2026-07-24
+Контролер:    FreeSlots
+Акција:       LoadSlots
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
+   at ClinicMvc.Repositories.AppointmentRepository.SearchFreeSlotsAsync(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\AppointmentRepository.cs:line 286
+   at ClinicMvc.Controllers.FreeSlotsController.LoadSlots(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\FreeSlotsController.cs:line 36
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 09:10:33
+HTTP метод:   POST
+URL:          /Account/Register
+Контролер:    Account
+Акција:       Register
+Тип грешка:   System.ArgumentException
+Порака:       The value cannot be an empty string. (Parameter 'address')
+Stack Trace:
+   at System.ArgumentException.ThrowNullOrEmptyException(String argument, String paramName)
+   at System.ArgumentException.ThrowIfNullOrEmpty(String argument, String paramName)
+   at System.Net.Mail.MailAddress.TryParse(String address, String displayName, Encoding displayNameEncoding, ValueTuple`4& parsedData, Boolean throwExceptionIfFail)
+   at System.Net.Mail.MailAddress..ctor(String address, String displayName)
+   at ClinicMvc.Services.SmtpEmailService.SendEmailAsync(String toAddress, String subject, String htmlBody) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Services\SmtpEmailService.cs:line 40
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 09:31:02
+HTTP метод:   GET
+URL:          /PatientPortal/LoadSlots?
+Контролер:    PatientPortal
+Акција:       LoadSlots
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
+   at ClinicMvc.Repositories.AppointmentRepository.SearchFreeSlotsAsync(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\AppointmentRepository.cs:line 286
+   at ClinicMvc.Controllers.PatientPortalController.LoadSlots(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\PatientPortalController.cs:line 82
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 09:31:12
+HTTP метод:   GET
+URL:          /PatientPortal/LoadSlots?
+Контролер:    PatientPortal
+Акција:       LoadSlots
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
+   at ClinicMvc.Repositories.AppointmentRepository.SearchFreeSlotsAsync(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\AppointmentRepository.cs:line 286
+   at ClinicMvc.Controllers.PatientPortalController.LoadSlots(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\PatientPortalController.cs:line 82
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+========================================================
+
+========================================================
+Дата и време: 2026-07-24 09:31:26
+HTTP метод:   GET
+URL:          /PatientPortal/LoadSlots?
+Контролер:    PatientPortal
+Акција:       LoadSlots
+Тип грешка:   FirebirdSql.Data.FirebirdClient.FbException
+Порака:       Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+Stack Trace:
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at FirebirdSql.Data.FirebirdClient.FbCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in /_/Dapper/SqlMapper.Async.cs:line 434
+   at ClinicMvc.Repositories.AppointmentRepository.SearchFreeSlotsAsync(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Repositories\AppointmentRepository.cs:line 286
+   at ClinicMvc.Controllers.PatientPortalController.LoadSlots(FreeSlotsFilter filter) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Controllers\PatientPortalController.cs:line 82
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at ClinicMvc.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context, IErrorLogger errorLogger) in C:\Users\Slave\Desktop\ClinicMvc\ClinicMvc\Middleware\GlobalExceptionMiddleware.cs:line 46
+Внатрешна грешка (InnerException):
+Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 5, column 41
+DATE
+========================================================
+

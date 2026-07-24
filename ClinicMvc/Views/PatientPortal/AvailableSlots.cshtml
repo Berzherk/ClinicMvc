@@ -1,0 +1,92 @@
+@* Прелистување и резервирање слободни термини - филтри по специјалност/лекар/датум *@
+@model AvailableSlotsViewModel
+@{
+    ViewData["Title"] = "Закажи термин";
+}
+
+<h2 class="mb-4">Слободни термини</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form id="filterForm" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Специјалност</label>
+                <select id="Specialty" name="Specialty" class="form-select" asp-items="Model.Specialties">
+                    <option value="">-- Сите --</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Лекар</label>
+                <select id="DoctorId" name="DoctorId" class="form-select" asp-items="Model.Doctors">
+                    <option value="">-- Сите --</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Датум</label>
+                <input type="date" id="Date" name="Date" class="form-control" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" id="btnFilter" class="btn btn-primary w-100">Филтрирај</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="alertBox"></div>
+<div id="slotsContainer">
+    <p class="text-muted">Изберете филтри и кликнете "Филтрирај" за да ги видите достапните термини.</p>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        const slotsContainer = document.getElementById('slotsContainer');
+        const alertBox = document.getElementById('alertBox');
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        async function loadSlots() {
+            const specialty = document.getElementById('Specialty').value;
+            const doctorId = document.getElementById('DoctorId').value;
+            const date = document.getElementById('Date').value;
+
+            const params = new URLSearchParams();
+            if (specialty) params.append('Specialty', specialty);
+            if (doctorId) params.append('DoctorId', doctorId);
+            if (date) params.append('Date', date);
+
+            const response = await fetch('@Url.Action("LoadSlots")?' + params.toString());
+            slotsContainer.innerHTML = await response.text();
+            attachBookHandlers();
+        }
+
+        function attachBookHandlers() {
+            document.querySelectorAll('.btn-book').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const slotId = this.dataset.id;
+                    this.disabled = true;
+
+                    const response = await fetch('@Url.Action("Book")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                        body: 'slotId=' + encodeURIComponent(slotId)
+                    });
+
+                    if (response.ok) {
+                        alertBox.innerHTML = '<div class="alert alert-success">Терминот е успешно резервиран! Проверете ја вашата е-пошта за потврда.</div>';
+                        loadSlots();
+                    } else {
+                        const data = await response.json().catch(() => null);
+                        const msg = data?.errors?.join(' ') || 'Настана грешка при резервација.';
+                        alertBox.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
+                        this.disabled = false;
+                        loadSlots();
+                    }
+                });
+            });
+        }
+
+        document.getElementById('btnFilter').addEventListener('click', loadSlots);
+        loadSlots();
+    </script>
+}

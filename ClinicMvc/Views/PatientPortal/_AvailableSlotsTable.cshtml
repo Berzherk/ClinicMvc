@@ -1,0 +1,28 @@
+@* Партиал за листа на слободни термини со копче "Резервирај" - AJAX-загрузена *@
+@model IEnumerable<ClinicMvc.Models.FreeSlot>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Нема слободни термини според избраните филтри.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        @foreach (var slot in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-1">@slot.DoctorName</h6>
+                        <p class="text-muted small mb-2">@slot.DoctorSpecialty</p>
+                        <p class="mb-1"><i class="bi bi-calendar"></i> @slot.Date.ToString("dd.MM.yyyy")</p>
+                        <p class="mb-3"><i class="bi bi-clock"></i> @slot.Time.ToString(@"hh\:mm")</p>
+                        <button class="btn btn-primary btn-sm w-100 btn-book" data-id="@slot.Id">
+                            Book Appointment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

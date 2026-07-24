@@ -28,14 +28,21 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IEmailConfirmationTokenRepository, EmailConfirmationTokenRepository>();
 
 // Сервиси за автентикација/авторизација
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+// ── Е-пошта - поставките доаѓаат од секцијата "Smtp" (appsettings / User Secrets / env vars) ──
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<IEmailConfirmationService, EmailConfirmationService>();
+
 // Services слој - ја содржи бизнис логиката, контролерите само ги повикуваат
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IPatientAccountService, PatientAccountService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 
 // Логер за грешки

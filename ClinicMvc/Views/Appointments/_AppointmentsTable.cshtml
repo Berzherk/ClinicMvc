@@ -1,4 +1,4 @@
-@* Partial View за табеларен приказ на термините - го користат Index и AJAX повиците *@
+@* Partial View за табеларен приказ на термините/слотовите - го користат Index и AJAX повиците *@
 @model IEnumerable<Appointment>
 
 <table class="table table-bordered table-hover">
@@ -27,7 +27,7 @@
                 <tr id="appointment-row-@a.Id">
                     <td>@a.AppointmentDate.ToString("dd.MM.yyyy")</td>
                     <td>@a.AppointmentTime.ToString(@"hh\:mm")</td>
-                    <td>@a.PatientName</td>
+                    <td>@(a.PatientName ?? "—")</td>
                     <td>@a.DoctorName</td>
                     <td>@a.DoctorSpecialty</td>
                     <td>
@@ -35,38 +35,37 @@
                             // Секој статус добива своја боја за полесно визуелно снаоѓање
                             var badgeClass = a.Status switch
                             {
-                                "Zakazan"  => "bg-primary",
-                                "Vo tek"   => "bg-success",
-                                "Zavrsen"  => "bg-secondary",
-                                "Otkazen"  => "bg-danger",
-                                _          => "bg-light text-dark"
+                                "Free"      => "bg-light text-dark border",
+                                "Booked"    => "bg-primary",
+                                "Completed" => "bg-success",
+                                "Cancelled" => "bg-danger",
+                                _           => "bg-light text-dark"
                             };
                         }
                         <span class="badge @badgeClass">@a.Status</span>
                     </td>
                     <td class="text-nowrap">
-                        @* Копче "Почни преглед" - видливо само за термини во статус Zakazan *@
-                        @if (a.Status == "Zakazan")
+                        @* Слот е сè уште слободен - може да се менува/брише слободно *@
+                        @if (a.Status == "Free")
                         {
-                            <button class="btn btn-sm btn-success" onclick="startExam(@a.Id)" title="Започни преглед">
-                                <i class="bi bi-play-fill"></i>
+                            <button class="btn btn-sm btn-warning" onclick="openEditModal(@a.Id)" title="Измени слот">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAppointment(@a.Id)" title="Избриши слот">
+                                <i class="bi bi-trash-fill"></i>
                             </button>
                         }
 
-                        @* Копче "Заврши преглед" - видливо само за термини во статус Vo tek *@
-                        @if (a.Status == "Vo tek")
+                        @* Резервиран термин - докторот може да го заврши или откаже *@
+                        @if (a.Status == "Booked")
                         {
-                            <button class="btn btn-sm btn-secondary" onclick="openFinishModal(@a.Id)" title="Заврши преглед">
+                            <button class="btn btn-sm btn-success" onclick="openCompleteModal(@a.Id)" title="Означи завршено">
                                 <i class="bi bi-check-lg"></i>
                             </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="openCancelModal(@a.Id)" title="Откажи термин">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         }
-
-                        <button class="btn btn-sm btn-warning" onclick="openEditModal(@a.Id)" title="Измени">
-                            <i class="bi bi-pencil-fill"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteAppointment(@a.Id)" title="Избриши">
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
                     </td>
                 </tr>
             }
